@@ -78,7 +78,7 @@
   - Write unit tests for all valid state transitions and error conditions
   - _Requirements: 1.1, 1.5, 6.1_
 
-- [ ] 10. Implement dialogue manager for conversation context
+- [x] 10. Implement dialogue manager for conversation context
   - Create DialogueManager class for maintaining conversation history and context
   - Implement multi-turn dialogue context preservation with memory management
   - Add conversation summarization for long conversations exceeding context limits
@@ -87,7 +87,7 @@
   - Write unit tests for context management, history preservation, and summarization
   - _Requirements: 1.3, 4.1, 4.2_
 
-- [ ] 11. Develop main call orchestrator
+- [x] 11. Develop main call orchestrator
   - Create CallOrchestrator class with dependency injection for all service clients
   - Implement LiveKit event handling for call start, audio received, and call end events
   - Add audio stream management with proper buffering and processing

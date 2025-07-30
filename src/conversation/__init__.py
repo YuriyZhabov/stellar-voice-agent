@@ -11,10 +11,22 @@ from .state_machine import (
     StateTransition,
     StateMetrics
 )
+from .dialogue_manager import (
+    DialogueManager,
+    ConversationTurn,
+    ConversationSummary,
+    ConversationMetrics,
+    ConversationPhase
+)
 
 __all__ = [
     "ConversationState",
     "ConversationStateMachine", 
     "StateTransition",
-    "StateMetrics"
+    "StateMetrics",
+    "DialogueManager",
+    "ConversationTurn",
+    "ConversationSummary",
+    "ConversationMetrics",
+    "ConversationPhase"
 ]

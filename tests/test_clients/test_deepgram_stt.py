@@ -244,9 +244,19 @@ class TestDeepgramSTTClient:
         )
         
         client = DeepgramSTTClient()
-        audio_data = b"fake_audio_data"
+        # Use larger audio data to pass validation
+        audio_data = b"fake_audio_data" * 20  # Make it larger than 100 bytes
         
-        result = await client.transcribe_batch(audio_data)
+        # Mock the audio validation to always pass
+        with patch('src.clients.deepgram_stt.validate_audio_data') as mock_validate:
+            mock_validate.return_value = MagicMock(
+                is_valid=True,
+                detected_format="wav",
+                duration_estimate=1.0,
+                file_size=len(audio_data)
+            )
+            
+            result = await client.transcribe_batch(audio_data)
         
         assert isinstance(result, TranscriptionResult)
         assert result.text == "Hello world"
@@ -283,18 +293,28 @@ class TestDeepgramSTTClient:
         )
         
         client = DeepgramSTTClient()
-        audio_data = b"fake_audio_data"
+        # Use larger audio data to pass validation
+        audio_data = b"fake_audio_data" * 20  # Make it larger than 100 bytes
         custom_options = {
             "model": "nova-2-general",
             "language": "es-ES",
             "custom_param": "value"
         }
         
-        result = await client.transcribe_batch(
-            audio_data,
-            mimetype="audio/mp3",
-            options=custom_options
-        )
+        # Mock the audio validation to always pass
+        with patch('src.clients.deepgram_stt.validate_audio_data') as mock_validate:
+            mock_validate.return_value = MagicMock(
+                is_valid=True,
+                detected_format="mp3",
+                duration_estimate=1.0,
+                file_size=len(audio_data)
+            )
+            
+            result = await client.transcribe_batch(
+                audio_data,
+                mimetype="audio/mp3",
+                options=custom_options
+            )
         
         assert result.text == "Test"
         
@@ -313,10 +333,20 @@ class TestDeepgramSTTClient:
         )
         
         client = DeepgramSTTClient()
-        audio_data = b"fake_audio_data"
+        # Use larger audio data to pass validation
+        audio_data = b"fake_audio_data" * 20  # Make it larger than 100 bytes
         
-        with pytest.raises(Exception, match="Transcription failed"):
-            await client.transcribe_batch(audio_data)
+        # Mock the audio validation to always pass
+        with patch('src.clients.deepgram_stt.validate_audio_data') as mock_validate:
+            mock_validate.return_value = MagicMock(
+                is_valid=True,
+                detected_format="wav",
+                duration_estimate=1.0,
+                file_size=len(audio_data)
+            )
+            
+            with pytest.raises(Exception, match="Transcription failed"):
+                await client.transcribe_batch(audio_data)
     
     @pytest.mark.asyncio
     async def test_transcribe_stream_basic(self, mock_settings, mock_deepgram_client):

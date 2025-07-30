@@ -1,9 +1,0 @@
-{
-  "name": "Kiro",
-  "version": "0.1.25",
-  "private": true,
-  "overrides": {
-    "node-gyp-build": "4.8.1"
-  },
-  "type": "module"
-}

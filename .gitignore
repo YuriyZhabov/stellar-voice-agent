@@ -385,14 +385,18 @@ venv/
 env/
 
 # System files
-.kiro-server/
 .aws/
 .cache/
 .ssh/
 etc/
 usr/
-root/# Voi
-ce AI Agent specific
+root/
+
+# Kiro IDE files
+.kiro-server/
+.docker/
+
+# Voice AI Agent specific
 *.wav
 *.mp3
 *.flac

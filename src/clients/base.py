@@ -11,6 +11,8 @@ from uuid import uuid4
 
 import httpx
 
+from src.metrics import get_metrics_collector, timer
+
 
 T = TypeVar('T')
 

@@ -8,6 +8,14 @@ from typing import Optional, List, Dict, Any, Union
 from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings
 
+from src.security import (
+    generate_secret_key, 
+    validate_secret_key, 
+    validate_api_key, 
+    APIKeyType,
+    SecurityConfig
+)
+
 
 class Environment(str, Enum):
     """Application environment types."""
@@ -309,7 +317,7 @@ class Settings(BaseSettings):
     secret_key: str = Field(
         default="your-secret-key-here-change-this-in-production",
         min_length=32,
-        description="Secret key for session management"
+        description="Secret key for session management and cryptographic operations"
     )
     
     enable_cors: bool = Field(
@@ -469,12 +477,70 @@ class Settings(BaseSettings):
     
     @field_validator('secret_key')
     @classmethod
-    def validate_secret_key(cls, v, info):
-        """Validate secret key in production."""
-        if hasattr(info, 'data') and info.data:
-            environment = info.data.get('environment', Environment.DEVELOPMENT)
-            if environment == Environment.PRODUCTION and v == "your-secret-key-here-change-this-in-production":
-                raise ValueError("Secret key must be changed in production environment")
+    def validate_secret_key_strength(cls, v, info):
+        """Validate secret key strength and security."""
+        # Skip validation in test mode
+        if hasattr(info, 'data') and info.data and info.data.get('environment') == Environment.TESTING:
+            return v
+        
+        if not validate_secret_key(v):
+            raise ValueError(
+                f"Secret key does not meet security requirements. "
+                f"Must be at least {SecurityConfig.MIN_SECRET_KEY_LENGTH} characters long "
+                f"and cryptographically strong."
+            )
+        return v
+    
+    @field_validator('deepgram_api_key')
+    @classmethod
+    def validate_deepgram_key(cls, v, info):
+        """Validate Deepgram API key format."""
+        if v is not None and v.strip():
+            # Skip validation in test mode
+            if hasattr(info, 'data') and info.data and info.data.get('environment') == Environment.TESTING:
+                return v
+            result = validate_api_key(v, APIKeyType.DEEPGRAM)
+            if not result.is_valid:
+                raise ValueError(f"Invalid Deepgram API key: {result.error_message}")
+        return v
+    
+    @field_validator('openai_api_key')
+    @classmethod
+    def validate_openai_key(cls, v, info):
+        """Validate OpenAI API key format."""
+        if v is not None and v.strip():
+            # Skip validation in test mode
+            if hasattr(info, 'data') and info.data and info.data.get('environment') == Environment.TESTING:
+                return v
+            result = validate_api_key(v, APIKeyType.OPENAI)
+            if not result.is_valid:
+                raise ValueError(f"Invalid OpenAI API key: {result.error_message}")
+        return v
+    
+    @field_validator('cartesia_api_key')
+    @classmethod
+    def validate_cartesia_key(cls, v, info):
+        """Validate Cartesia API key format."""
+        if v is not None and v.strip():
+            # Skip validation in test mode
+            if hasattr(info, 'data') and info.data and info.data.get('environment') == Environment.TESTING:
+                return v
+            result = validate_api_key(v, APIKeyType.CARTESIA)
+            if not result.is_valid:
+                raise ValueError(f"Invalid Cartesia API key: {result.error_message}")
+        return v
+    
+    @field_validator('livekit_api_key')
+    @classmethod
+    def validate_livekit_key(cls, v, info):
+        """Validate LiveKit API key format."""
+        if v is not None and v.strip():
+            # Skip validation in test mode
+            if hasattr(info, 'data') and info.data and info.data.get('environment') == Environment.TESTING:
+                return v
+            result = validate_api_key(v, APIKeyType.LIVEKIT)
+            if not result.is_valid:
+                raise ValueError(f"Invalid LiveKit API key: {result.error_message}")
         return v
     
     @field_validator('public_ip')

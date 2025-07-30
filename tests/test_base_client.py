@@ -180,7 +180,9 @@ class TestBaseResilientClient:
     
     def test_delay_calculation(self):
         """Test exponential backoff delay calculation."""
-        client = MockResilientClient("test-service")
+        # Disable jitter for predictable results
+        retry_config = RetryConfig(jitter=False)
+        client = MockResilientClient("test-service", retry_config=retry_config)
         
         # Test exponential backoff
         delay1 = client._calculate_delay(1)

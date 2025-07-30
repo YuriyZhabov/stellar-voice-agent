@@ -24,7 +24,7 @@
   - Write comprehensive unit tests for configuration validation and edge cases
   - _Requirements: 5.1, 6.2, 6.4_
 
-- [ ] 4. Develop base resilient client infrastructure
+- [x] 4. Develop base resilient client infrastructure
   - Implement BaseResilientClient with exponential backoff retry logic
   - Add circuit breaker pattern for handling service failures gracefully
   - Create centralized logging system with structured JSON format and correlation IDs
@@ -33,7 +33,7 @@
   - Write unit tests for retry logic, circuit breaker, and error handling scenarios
   - _Requirements: 2.3, 2.4, 6.4_
 
-- [ ] 5. Create Deepgram STT client with streaming support
+- [x] 5. Create Deepgram STT client with streaming support
   - Implement DeepgramSTTClient extending BaseResilientClient
   - Add support for real-time streaming transcription with low latency
   - Implement batch transcription mode for non-streaming scenarios
@@ -42,7 +42,16 @@
   - Write unit tests with mocked Deepgram API responses and error scenarios
   - _Requirements: 1.2, 2.3, 4.2_
 
-- [ ] 6. Implement OpenAI LLM client with context management
+- [x] 6. Address critical security vulnerabilities
+  - Generate and configure a cryptographically strong SECRET_KEY for production
+  - Add API key format validation for all external services (OpenAI, Deepgram, Cartesia)
+  - Implement audio data validation and sanitization, including size and format checks
+  - Configure HTTPS/TLS enforcement and secure headers
+  - Create a filter to exclude sensitive data from logs
+  - Write tests for all security mechanisms
+  - _Requirements: 6.2, 6.4, Security Audit Report_
+
+- [x] 7. Implement OpenAI LLM client with context management
   - Create OpenAILLMClient with context window management and intelligent truncation
   - Add token usage monitoring and cost calculation for budget tracking
   - Implement response streaming for reduced perceived latency
@@ -51,7 +60,7 @@
   - Write unit tests for context management, token calculation, and fallback scenarios
   - _Requirements: 1.3, 2.4, 4.2, 4.4_
 
-- [ ] 7. Develop Cartesia TTS client for speech synthesis
+- [x] 8. Develop Cartesia TTS client for speech synthesis
   - Implement CartesiaTTSClient with streaming audio synthesis capabilities
   - Add voice selection and customization options for natural speech
   - Create audio format optimization specifically for telephony applications
@@ -60,7 +69,7 @@
   - Write unit tests with mocked Cartesia API and audio processing scenarios
   - _Requirements: 1.4, 4.2_
 
-- [ ] 8. Create finite state machine for conversation management
+- [x] 9. Create finite state machine for conversation management
   - Define ConversationState enum with LISTENING, PROCESSING, SPEAKING states
   - Implement ConversationStateMachine with state transition validation
   - Add state transition logging and metrics for monitoring conversation flow
@@ -69,7 +78,7 @@
   - Write unit tests for all valid state transitions and error conditions
   - _Requirements: 1.1, 1.5, 6.1_
 
-- [ ] 9. Implement dialogue manager for conversation context
+- [ ] 10. Implement dialogue manager for conversation context
   - Create DialogueManager class for maintaining conversation history and context
   - Implement multi-turn dialogue context preservation with memory management
   - Add conversation summarization for long conversations exceeding context limits
@@ -78,7 +87,7 @@
   - Write unit tests for context management, history preservation, and summarization
   - _Requirements: 1.3, 4.1, 4.2_
 
-- [ ] 10. Develop main call orchestrator
+- [ ] 11. Develop main call orchestrator
   - Create CallOrchestrator class with dependency injection for all service clients
   - Implement LiveKit event handling for call start, audio received, and call end events
   - Add audio stream management with proper buffering and processing
@@ -87,7 +96,7 @@
   - Write unit tests for call lifecycle management and error scenarios
   - _Requirements: 1.1, 1.5, 2.1, 2.2, 4.3_
 
-- [ ] 11. Create SQLite storage for conversation logging
+- [ ] 12. Create SQLite storage for conversation logging
   - Implement database schema for storing call metadata, transcriptions, and responses
   - Create data access layer with proper connection management and error handling
   - Add conversation logging with complete transcription and response data
@@ -96,7 +105,7 @@
   - Write unit tests for database operations and data integrity
   - _Requirements: 4.1, 4.2, 5.2_
 
-- [ ] 12. Configure LiveKit SIP integration
+- [ ] 13. Configure LiveKit SIP integration
   - Create livekit-sip.yaml configuration file with proper routing rules
   - Set up call metadata transmission between LiveKit and the application
   - Configure audio codec settings optimized for voice conversations
@@ -105,7 +114,7 @@
   - Test SIP integration with actual phone calls and verify audio quality
   - _Requirements: 1.1, 2.1, 5.4_
 
-- [ ] 13. Implement application entry point and lifecycle management
+- [ ] 14. Implement application entry point and lifecycle management
   - Create main application module with proper initialization sequence
   - Implement graceful shutdown handling for all services and connections
   - Add signal handling for SIGTERM and SIGINT for clean application termination
@@ -114,7 +123,7 @@
   - Write integration tests for application startup and shutdown procedures
   - _Requirements: 2.1, 2.2, 3.4, 6.1_
 
-- [ ] 14. Develop comprehensive monitoring and health checks
+- [ ] 15. Develop comprehensive monitoring and health checks
   - Implement health check endpoints for all critical system components
   - Create metrics collection for system performance, API usage, and costs
   - Add alerting mechanisms for system failures and performance degradation
@@ -123,7 +132,7 @@
   - Write tests for health check accuracy and monitoring system reliability
   - _Requirements: 2.2, 3.4, 4.3, 4.4_
 
-- [ ] 15. Create end-to-end integration tests
+- [ ] 16. Create end-to-end integration tests
   - Implement complete conversation flow tests with all AI services
   - Create load testing scenarios for multiple concurrent calls
   - Add latency measurement tests to verify sub-1.5 second response requirements
@@ -132,7 +141,7 @@
   - Add performance regression tests for deployment validation
   - _Requirements: 1.5, 2.1, 2.2, 4.3_
 
-- [ ] 16. Optimize system performance and finalize deployment
+- [ ] 17. Optimize system performance and finalize deployment
   - Measure and optimize end-to-end latency for all conversation components
   - Configure system parameters to minimize response delays
   - Implement production-ready logging and monitoring configurations

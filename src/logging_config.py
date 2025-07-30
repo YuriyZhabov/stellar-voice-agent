@@ -7,6 +7,7 @@ from datetime import datetime
 from typing import Any, Dict, Optional
 
 from src.config import Settings
+from src.security import SensitiveDataFilter
 
 
 class JSONFormatter(logging.Formatter):
@@ -87,6 +88,11 @@ def setup_logging(settings: Settings) -> None:
         )
     
     console_handler.setFormatter(formatter)
+    
+    # Add sensitive data filter to all handlers
+    sensitive_filter = SensitiveDataFilter()
+    console_handler.addFilter(sensitive_filter)
+    
     root_logger.addHandler(console_handler)
     
     # Set specific logger levels
@@ -96,7 +102,7 @@ def setup_logging(settings: Settings) -> None:
     # Log startup message
     logger = logging.getLogger(__name__)
     logger.info(
-        "Logging system initialized",
+        "Logging system initialized with security filtering",
         extra={
             "log_level": settings.log_level,
             "log_format": settings.log_format,

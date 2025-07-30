@@ -140,10 +140,7 @@ class MetricsCollector:
             return 0.0
         
         sorted_values = sorted(values)
-        index = int(len(sorted_values) * percentile)
-        if index >= len(sorted_values):
-            index = len(sorted_values) - 1
-        
+        index = int((len(sorted_values) - 1) * percentile)
         return sorted_values[index]
     
     def get_all_metrics(self) -> Dict[str, Any]:
@@ -169,7 +166,20 @@ class MetricsCollector:
             
             # Histograms
             for key in self._histograms.keys():
-                stats = self.get_histogram_stats(key.split("{")[0], self._labels.get(key, {}))
+                values = self._histograms[key]
+                if not values:
+                    stats = {"count": 0, "sum": 0, "min": 0, "max": 0, "avg": 0}
+                else:
+                    stats = {
+                        "count": len(values),
+                        "sum": sum(values),
+                        "min": min(values),
+                        "max": max(values),
+                        "avg": sum(values) / len(values),
+                        "p50": self._percentile(values, 0.5),
+                        "p95": self._percentile(values, 0.95),
+                        "p99": self._percentile(values, 0.99)
+                    }
                 metrics[key] = {
                     "type": "histogram",
                     "stats": stats,
@@ -178,7 +188,20 @@ class MetricsCollector:
             
             # Timers
             for key in self._timers.keys():
-                stats = self.get_timer_stats(key.split("{")[0], self._labels.get(key, {}))
+                values = self._timers[key]
+                if not values:
+                    stats = {"count": 0, "sum": 0, "min": 0, "max": 0, "avg": 0}
+                else:
+                    stats = {
+                        "count": len(values),
+                        "sum": sum(values),
+                        "min": min(values),
+                        "max": max(values),
+                        "avg": sum(values) / len(values),
+                        "p50": self._percentile(values, 0.5),
+                        "p95": self._percentile(values, 0.95),
+                        "p99": self._percentile(values, 0.99)
+                    }
                 metrics[key] = {
                     "type": "timer",
                     "stats": stats,

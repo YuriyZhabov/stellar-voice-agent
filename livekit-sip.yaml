@@ -1,0 +1,419 @@
+# LiveKit SIP Configuration for Voice AI Agent
+# This configuration file sets up SIP integration with proper routing rules,
+# audio codec settings optimized for voice conversations, and MTS Exolve integration.
+
+# =============================================================================
+# SIP TRUNK CONFIGURATION
+# =============================================================================
+
+# SIP trunk configuration for MTS Exolve integration
+sip_trunks:
+  - name: "mts-exolve-trunk"
+    # SIP server configuration from environment variables
+    # These will be populated from .env file
+    host: "${SIP_SERVER}"
+    port: ${SIP_PORT:-5060}
+    transport: "${SIP_TRANSPORT:-UDP}"
+    
+    # Authentication credentials
+    username: "${SIP_USERNAME}"
+    password: "${SIP_PASSWORD}"
+    
+    # Trunk-specific settings
+    register: true
+    register_interval: 300  # 5 minutes
+    keep_alive_interval: 30  # 30 seconds
+    
+    # Connection monitoring and automatic reconnection
+    health_check:
+      enabled: true
+      interval: 60  # Check every minute
+      timeout: 10   # 10 second timeout
+      max_failures: 3  # Reconnect after 3 failures
+      
+    # Retry configuration for SIP failures
+    retry:
+      enabled: true
+      initial_delay: 1000  # 1 second
+      max_delay: 30000     # 30 seconds
+      multiplier: 2.0      # Exponential backoff
+      max_attempts: 5
+    
+    # Security settings
+    security:
+      require_auth: true
+      allow_anonymous: false
+      rtp_encryption: false  # Typically disabled for telephony
+      
+    # Network settings
+    network:
+      local_ip: "${PUBLIC_IP}"
+      rtp_port_range:
+        min: 10000
+        max: 20000
+      
+# =============================================================================
+# AUDIO CODEC CONFIGURATION
+# =============================================================================
+
+# Audio codec settings optimized for voice conversations
+audio_codecs:
+  # Primary codec - G.711 μ-law (PCMU) - Standard for North American telephony
+  - name: "PCMU"
+    payload_type: 0
+    sample_rate: 8000
+    channels: 1
+    priority: 1
+    enabled: true
+    
+  # Secondary codec - G.711 A-law (PCMA) - Standard for international telephony
+  - name: "PCMA"
+    payload_type: 8
+    sample_rate: 8000
+    channels: 1
+    priority: 2
+    enabled: true
+    
+  # Wideband codec - G.722 for better quality when supported
+  - name: "G722"
+    payload_type: 9
+    sample_rate: 16000
+    channels: 1
+    priority: 3
+    enabled: true
+    
+  # Fallback codec - G.729 for low bandwidth
+  - name: "G729"
+    payload_type: 18
+    sample_rate: 8000
+    channels: 1
+    priority: 4
+    enabled: false  # Disabled by default due to licensing
+    
+# Audio processing settings
+audio_processing:
+  # Echo cancellation
+  echo_cancellation:
+    enabled: true
+    tail_length: 200  # milliseconds
+    
+  # Noise suppression
+  noise_suppression:
+    enabled: true
+    level: "moderate"  # low, moderate, high, very_high
+    
+  # Automatic gain control
+  automatic_gain_control:
+    enabled: true
+    target_level: -18  # dBFS
+    
+  # Voice activity detection
+  voice_activity_detection:
+    enabled: true
+    sensitivity: "medium"  # low, medium, high
+    
+  # Audio buffer settings
+  buffer:
+    size: ${AUDIO_BUFFER_MS:-100}  # milliseconds
+    min_delay: 20   # minimum buffer delay
+    max_delay: 500  # maximum buffer delay
+    
+  # Sample rate conversion
+  sample_rate: ${AUDIO_SAMPLE_RATE:-16000}
+  channels: ${AUDIO_CHANNELS:-1}
+  bit_depth: ${AUDIO_BIT_DEPTH:-16}
+
+# =============================================================================
+# CALL ROUTING RULES
+# =============================================================================
+
+# Call routing configuration
+routing:
+  # Inbound call routing rules
+  inbound_rules:
+    - name: "voice-ai-agent-routing"
+      # Match incoming calls to our SIP number
+      match:
+        to: "${SIP_NUMBER}"
+        trunk: "mts-exolve-trunk"
+      
+      # Route to LiveKit room
+      action:
+        type: "livekit_room"
+        room_name_template: "voice-ai-call-{call_id}"
+        participant_name: "caller"
+        participant_identity: "{caller_number}"
+        
+        # Metadata to pass to the application
+        metadata:
+          call_type: "inbound"
+          service: "voice-ai-agent"
+          trunk: "mts-exolve-trunk"
+          timestamp: "{timestamp}"
+          
+        # Room configuration
+        room_config:
+          # Enable recording if needed
+          recording: false
+          
+          # Room timeout (auto-cleanup)
+          empty_timeout: 300  # 5 minutes
+          max_duration: 1800  # 30 minutes
+          
+          # Participant limits
+          max_participants: 2  # Caller + AI agent
+          
+  # Outbound call routing (for future use)
+  outbound_rules:
+    - name: "outbound-calls"
+      match:
+        from: "${SIP_NUMBER}"
+      action:
+        type: "sip_trunk"
+        trunk: "mts-exolve-trunk"
+
+# =============================================================================
+# LIVEKIT INTEGRATION
+# =============================================================================
+
+# LiveKit server configuration
+livekit:
+  # Server connection
+  server:
+    url: "${LIVEKIT_URL}"
+    api_key: "${LIVEKIT_API_KEY}"
+    api_secret: "${LIVEKIT_API_SECRET}"
+    
+  # Connection settings
+  connection:
+    timeout: 30000  # 30 seconds
+    keep_alive: 25000  # 25 seconds
+    reconnect: true
+    max_reconnect_attempts: 10
+    reconnect_delay: 1000  # 1 second initial delay
+    
+  # Room settings
+  room_defaults:
+    # Audio settings
+    audio:
+      enabled: true
+      codec: "opus"  # Internal LiveKit codec
+      bitrate: 64000  # 64 kbps
+      
+    # Disable video for voice-only calls
+    video:
+      enabled: false
+      
+    # Data channel for metadata
+    data:
+      enabled: true
+      reliable: true
+      
+  # Webhook configuration for call events
+  webhooks:
+    enabled: true
+    url: "http://${DOMAIN}:${PORT:-8000}/webhooks/livekit"
+    secret: "${SECRET_KEY}"
+    
+    # Events to subscribe to
+    events:
+      - "room_started"
+      - "room_finished"
+      - "participant_joined"
+      - "participant_left"
+      - "track_published"
+      - "track_unpublished"
+      - "recording_started"
+      - "recording_finished"
+
+# =============================================================================
+# CALL METADATA TRANSMISSION
+# =============================================================================
+
+# Metadata configuration for call information transmission
+metadata:
+  # Call context information to include
+  call_context:
+    - "call_id"
+    - "caller_number"
+    - "called_number"
+    - "start_time"
+    - "trunk_name"
+    - "codec_used"
+    - "caller_ip"
+    
+  # Custom headers to pass through
+  custom_headers:
+    - "X-Call-Source"
+    - "X-Customer-ID"
+    - "X-Campaign-ID"
+    
+  # Metadata transmission method
+  transmission:
+    method: "webhook"  # webhook, websocket, or both
+    format: "json"
+    compression: false
+    
+  # Webhook-specific settings
+  webhook:
+    timeout: 5000  # 5 seconds
+    retry_attempts: 3
+    retry_delay: 1000  # 1 second
+
+# =============================================================================
+# MONITORING AND LOGGING
+# =============================================================================
+
+# Monitoring configuration
+monitoring:
+  # Health checks
+  health_check:
+    enabled: true
+    endpoint: "/health/sip"
+    interval: 30  # seconds
+    
+  # Metrics collection
+  metrics:
+    enabled: true
+    endpoint: "/metrics/sip"
+    
+    # Metrics to collect
+    collect:
+      - "call_count"
+      - "call_duration"
+      - "call_success_rate"
+      - "audio_quality"
+      - "latency"
+      - "codec_usage"
+      - "trunk_status"
+      
+  # Logging configuration
+  logging:
+    level: "${LOG_LEVEL:-INFO}"
+    format: "json"
+    
+    # Log categories
+    categories:
+      sip: true
+      audio: true
+      routing: true
+      livekit: true
+      
+    # Log rotation
+    rotation:
+      enabled: true
+      max_size: "100MB"
+      max_files: 10
+
+# =============================================================================
+# QUALITY OF SERVICE (QoS)
+# =============================================================================
+
+# QoS settings for optimal voice quality
+qos:
+  # DSCP marking for voice traffic
+  dscp:
+    voice: 46  # EF (Expedited Forwarding)
+    signaling: 24  # CS3 (Class Selector 3)
+    
+  # Traffic shaping
+  traffic_shaping:
+    enabled: false  # Usually handled by network infrastructure
+    
+  # Jitter buffer settings
+  jitter_buffer:
+    enabled: true
+    min_delay: 20   # milliseconds
+    max_delay: 200  # milliseconds
+    target_delay: 60  # milliseconds
+    
+  # Packet loss handling
+  packet_loss:
+    fec_enabled: false  # Forward Error Correction
+    redundancy: false   # Packet redundancy
+    
+# =============================================================================
+# SECURITY CONFIGURATION
+# =============================================================================
+
+# Security settings
+security:
+  # TLS configuration
+  tls:
+    enabled: false  # Typically disabled for SIP trunks
+    version: "1.2"
+    verify_certificates: true
+    
+  # SRTP configuration
+  srtp:
+    enabled: false  # Typically disabled for telephony
+    
+  # Access control
+  access_control:
+    # IP whitelist for SIP traffic
+    allowed_ips:
+      - "${PUBLIC_IP}/32"
+      # Add MTS Exolve IP ranges here
+      
+    # Rate limiting
+    rate_limiting:
+      enabled: true
+      calls_per_minute: 60
+      calls_per_hour: 1000
+      
+  # Authentication
+  authentication:
+    digest_auth: true
+    realm: "${DOMAIN}"
+    
+# =============================================================================
+# DEVELOPMENT AND TESTING
+# =============================================================================
+
+# Development settings (only active when ENVIRONMENT=development)
+development:
+  # Test mode settings
+  test_mode: ${TEST_MODE:-false}
+  
+  # Mock SIP server for testing
+  mock_sip:
+    enabled: ${TEST_MODE:-false}
+    port: 5061
+    
+  # Debug settings
+  debug:
+    enabled: ${DEBUG:-false}
+    verbose_logging: ${DEBUG:-false}
+    packet_capture: false
+    
+  # Test call generation
+  test_calls:
+    enabled: false
+    interval: 300  # 5 minutes
+    duration: 60   # 1 minute
+    
+# =============================================================================
+# PERFORMANCE TUNING
+# =============================================================================
+
+# Performance optimization settings
+performance:
+  # Connection pooling
+  connection_pool:
+    size: 10
+    timeout: 30000
+    
+  # Threading
+  threads:
+    sip_processing: 4
+    audio_processing: 2
+    
+  # Memory management
+  memory:
+    buffer_pool_size: 1000
+    max_memory_usage: "512MB"
+    
+  # CPU optimization
+  cpu:
+    affinity: false  # CPU affinity for threads
+    priority: "normal"  # Process priority

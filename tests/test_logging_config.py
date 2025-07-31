@@ -29,7 +29,8 @@ class TestJSONFormatter:
             lineno=42,
             msg="Test message",
             args=(),
-            exc_info=None
+            exc_info=None,
+            func="<module>"
         )
         
         formatted = formatter.format(record)
@@ -53,7 +54,8 @@ class TestJSONFormatter:
             lineno=42,
             msg="Test message",
             args=(),
-            exc_info=None
+            exc_info=None,
+            func="<module>"
         )
         record.correlation_id = "test-correlation-123"
         
@@ -72,7 +74,8 @@ class TestJSONFormatter:
             lineno=42,
             msg="Test message",
             args=(),
-            exc_info=None
+            exc_info=None,
+            func="<module>"
         )
         record.service = "test-service"
         
@@ -91,7 +94,8 @@ class TestJSONFormatter:
             lineno=42,
             msg="Test message",
             args=(),
-            exc_info=None
+            exc_info=None,
+            func="<module>"
         )
         record.custom_field = "custom_value"
         record.request_id = "req-123"
@@ -116,7 +120,8 @@ class TestCorrelationFilter:
             lineno=42,
             msg="Test message",
             args=(),
-            exc_info=None
+            exc_info=None,
+            func="<module>"
         )
         
         result = correlation_filter.filter(record)
@@ -134,7 +139,8 @@ class TestCorrelationFilter:
             lineno=42,
             msg="Test message",
             args=(),
-            exc_info=None
+            exc_info=None,
+            func="<module>"
         )
         record.correlation_id = "existing-correlation"
         
@@ -153,7 +159,8 @@ class TestCorrelationFilter:
             lineno=42,
             msg="Test message",
             args=(),
-            exc_info=None
+            exc_info=None,
+            func="<module>"
         )
         
         result = correlation_filter.filter(record)

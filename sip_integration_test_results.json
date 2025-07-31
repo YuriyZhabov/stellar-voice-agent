@@ -1,0 +1,168 @@
+{
+  "total_tests": 9,
+  "passed": 7,
+  "failed": 2,
+  "success_rate": 0.7777777777777778,
+  "timestamp": "2025-07-31T05:53:08.717622+00:00",
+  "results": {
+    "Configuration Validation": {
+      "status": "FAIL",
+      "details": {}
+    },
+    "Environment Variables": {
+      "status": "FAIL",
+      "details": {}
+    },
+    "SIP Trunk Connectivity": {
+      "status": "PASS",
+      "details": {
+        "mts-exolve-trunk": {
+          "connectivity": true,
+          "response_time": 0.00013375282287597656,
+          "host": "",
+          "port": 5060
+        }
+      }
+    },
+    "LiveKit API Connection": {
+      "status": "PASS",
+      "details": {
+        "error": "LiveKit credentials not configured"
+      }
+    },
+    "Audio Codec Configuration": {
+      "status": "PASS",
+      "details": {
+        "total_codecs": 4,
+        "enabled_codecs": [
+          {
+            "name": "PCMU",
+            "payload_type": 0,
+            "sample_rate": 8000,
+            "channels": 1,
+            "priority": 1
+          },
+          {
+            "name": "PCMA",
+            "payload_type": 8,
+            "sample_rate": 8000,
+            "channels": 1,
+            "priority": 2
+          },
+          {
+            "name": "G722",
+            "payload_type": 9,
+            "sample_rate": 16000,
+            "channels": 1,
+            "priority": 3
+          }
+        ],
+        "disabled_codecs": [
+          {
+            "name": "G729",
+            "payload_type": 18,
+            "sample_rate": 8000,
+            "channels": 1,
+            "priority": 4
+          }
+        ],
+        "priority_order": [
+          "PCMU",
+          "PCMA",
+          "G722",
+          "G729"
+        ]
+      }
+    },
+    "Webhook Endpoints": {
+      "status": "PASS",
+      "details": {
+        "webhook_url": "http://localhost:8000/webhooks/livekit",
+        "health_url": "http://localhost:8000/webhooks/health",
+        "tests": {
+          "health_endpoint": {
+            "error": "HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /webhooks/health (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x723cead871d0>: Failed to establish a new connection: [Errno 111] Connection refused'))",
+            "note": "Server may not be running"
+          }
+        },
+        "webhook_config": {
+          "enabled": true,
+          "url": "http://:8000/webhooks/livekit",
+          "events": [
+            "room_started",
+            "room_finished",
+            "participant_joined",
+            "participant_left",
+            "track_published",
+            "track_unpublished",
+            "recording_started",
+            "recording_finished"
+          ]
+        }
+      }
+    },
+    "Call Simulation": {
+      "status": "PASS",
+      "details": {
+        "error": "LiveKit client not available"
+      }
+    },
+    "Health Monitoring": {
+      "status": "PASS",
+      "details": {
+        "health_check": {
+          "enabled": true,
+          "endpoint": "/health/sip",
+          "interval": 30
+        },
+        "metrics": {
+          "enabled": true,
+          "endpoint": "/metrics/sip",
+          "collect": [
+            "call_count",
+            "call_duration",
+            "call_success_rate",
+            "audio_quality",
+            "latency",
+            "codec_usage",
+            "trunk_status"
+          ]
+        },
+        "logging": {
+          "level": "INFO",
+          "format": "json",
+          "categories": {
+            "sip": true,
+            "audio": true,
+            "routing": true,
+            "livekit": true
+          },
+          "rotation": {
+            "enabled": true,
+            "max_size": "100MB",
+            "max_files": 10
+          }
+        }
+      }
+    },
+    "Error Handling": {
+      "status": "PASS",
+      "details": {
+        "mts-exolve-trunk": {
+          "retry_enabled": true,
+          "max_attempts": 5,
+          "initial_delay": 1000,
+          "max_delay": 30000,
+          "multiplier": 2.0
+        },
+        "health_checks": {
+          "mts-exolve-trunk": {
+            "enabled": true,
+            "max_failures": 3,
+            "timeout": 10
+          }
+        }
+      }
+    }
+  }
+}

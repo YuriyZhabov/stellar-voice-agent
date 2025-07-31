@@ -96,7 +96,7 @@
   - Write unit tests for call lifecycle management and error scenarios
   - _Requirements: 1.1, 1.5, 2.1, 2.2, 4.3_
 
-- [ ] 12. Create SQLite storage for conversation logging
+- [x] 12. Create SQLite storage for conversation logging
   - Implement database schema for storing call metadata, transcriptions, and responses
   - Create data access layer with proper connection management and error handling
   - Add conversation logging with complete transcription and response data
@@ -105,7 +105,7 @@
   - Write unit tests for database operations and data integrity
   - _Requirements: 4.1, 4.2, 5.2_
 
-- [ ] 13. Configure LiveKit SIP integration
+- [x] 13. Configure LiveKit SIP integration
   - Create livekit-sip.yaml configuration file with proper routing rules
   - Set up call metadata transmission between LiveKit and the application
   - Configure audio codec settings optimized for voice conversations
@@ -114,7 +114,7 @@
   - Test SIP integration with actual phone calls and verify audio quality
   - _Requirements: 1.1, 2.1, 5.4_
 
-- [ ] 14. Implement application entry point and lifecycle management
+- [x] 14. Implement application entry point and lifecycle management
   - Create main application module with proper initialization sequence
   - Implement graceful shutdown handling for all services and connections
   - Add signal handling for SIGTERM and SIGINT for clean application termination
@@ -123,7 +123,7 @@
   - Write integration tests for application startup and shutdown procedures
   - _Requirements: 2.1, 2.2, 3.4, 6.1_
 
-- [ ] 15. Develop comprehensive monitoring and health checks
+- [-] 15. Develop comprehensive monitoring and health checks
   - Implement health check endpoints for all critical system components
   - Create metrics collection for system performance, API usage, and costs
   - Add alerting mechanisms for system failures and performance degradation

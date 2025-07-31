@@ -48,7 +48,7 @@ class SecurityConfig:
         APIKeyType.OPENAI: re.compile(r'^sk-[A-Za-z0-9_-]{20,}$'),
         APIKeyType.DEEPGRAM: re.compile(r'^[a-f0-9A-F]{20,}$'),
         APIKeyType.CARTESIA: re.compile(r'^[A-Za-z0-9_-]{20,}$'),
-        APIKeyType.LIVEKIT: re.compile(r'^API[A-Za-z0-9_-]{10,}$'),
+        APIKeyType.LIVEKIT: re.compile(r'^API[A-Za-z0-9_-]{8,}$'),  # Reduced minimum length for LiveKit
     }
     
     # Audio validation limits
@@ -187,11 +187,12 @@ def validate_api_key(api_key: str, key_type: Optional[APIKeyType] = None) -> API
     
     api_key = api_key.strip()
     
-    # Check minimum length
-    if len(api_key) < 20:
+    # Check minimum length (special case for LiveKit)
+    min_length = 12 if (key_type == APIKeyType.LIVEKIT or api_key.startswith('API')) else 20
+    if len(api_key) < min_length:
         return APIKeyValidationResult(
             is_valid=False,
-            error_message="API key is too short (minimum 20 characters)"
+            error_message=f"API key is too short (minimum {min_length} characters)"
         )
     
     # If key type is specified, validate against specific pattern

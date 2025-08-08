@@ -1,0 +1,120 @@
+groups:
+  - name: voice-ai-agent.rules
+    rules:
+      # High-level application metrics
+      - record: voice_ai:call_rate_5m
+        expr: rate(voice_ai_calls_total[5m])
+      
+      - record: voice_ai:call_success_rate_5m
+        expr: rate(voice_ai_calls_total{status="success"}[5m]) / rate(voice_ai_calls_total[5m])
+      
+      - record: voice_ai:response_latency_p95_5m
+        expr: histogram_quantile(0.95, rate(voice_ai_response_latency_seconds_bucket[5m]))
+      
+      - record: voice_ai:response_latency_p50_5m
+        expr: histogram_quantile(0.50, rate(voice_ai_response_latency_seconds_bucket[5m]))
+
+      # AI Service metrics
+      - record: voice_ai:stt_latency_p95_5m
+        expr: histogram_quantile(0.95, rate(stt_request_duration_seconds_bucket[5m]))
+      
+      - record: voice_ai:llm_latency_p95_5m
+        expr: histogram_quantile(0.95, rate(llm_request_duration_seconds_bucket[5m]))
+      
+      - record: voice_ai:tts_latency_p95_5m
+        expr: histogram_quantile(0.95, rate(tts_request_duration_seconds_bucket[5m]))
+
+      # Error rates
+      - record: voice_ai:stt_error_rate_5m
+        expr: rate(stt_requests_total{status="error"}[5m]) / rate(stt_requests_total[5m])
+      
+      - record: voice_ai:llm_error_rate_5m
+        expr: rate(llm_requests_total{status="error"}[5m]) / rate(llm_requests_total[5m])
+      
+      - record: voice_ai:tts_error_rate_5m
+        expr: rate(tts_requests_total{status="error"}[5m]) / rate(tts_requests_total[5m])
+
+  - name: voice-ai-agent.alerts
+    rules:
+      # Critical alerts
+      - alert: VoiceAIAgentDown
+        expr: up{job="voice-ai-agent"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Voice AI Agent is down"
+          description: "Voice AI Agent has been down for more than 1 minute."
+
+      - alert: HighResponseLatency
+        expr: voice_ai:response_latency_p95_5m > 2.0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High response latency detected"
+          description: "95th percentile response latency is {{ $value }}s, exceeding 2.0s threshold."
+
+      - alert: LowCallSuccessRate
+        expr: voice_ai:call_success_rate_5m < 0.95
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Low call success rate"
+          description: "Call success rate is {{ $value | humanizePercentage }}, below 95% threshold."
+
+      # Warning alerts
+      - alert: HighSTTLatency
+        expr: voice_ai:stt_latency_p95_5m > 1.0
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High STT latency"
+          description: "STT 95th percentile latency is {{ $value }}s, exceeding 1.0s threshold."
+
+      - alert: HighLLMLatency
+        expr: voice_ai:llm_latency_p95_5m > 3.0
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High LLM latency"
+          description: "LLM 95th percentile latency is {{ $value }}s, exceeding 3.0s threshold."
+
+      - alert: HighTTSLatency
+        expr: voice_ai:tts_latency_p95_5m > 1.0
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High TTS latency"
+          description: "TTS 95th percentile latency is {{ $value }}s, exceeding 1.0s threshold."
+
+      - alert: HighErrorRate
+        expr: (voice_ai:stt_error_rate_5m > 0.05) or (voice_ai:llm_error_rate_5m > 0.05) or (voice_ai:tts_error_rate_5m > 0.05)
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High error rate detected"
+          description: "One or more AI services have error rate above 5%."
+
+      - alert: HighMemoryUsage
+        expr: (process_resident_memory_bytes / 1024 / 1024 / 1024) > 1.5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage"
+          description: "Memory usage is {{ $value }}GB, exceeding 1.5GB threshold."
+
+      - alert: HighCPUUsage
+        expr: rate(process_cpu_seconds_total[5m]) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage"
+          description: "CPU usage is {{ $value }}%, exceeding 80% threshold."

@@ -1,0 +1,39 @@
+livekit:
+  url: wss://voice-mz90cpgw.livekit.cloud
+  api_key: APIVjiLTSm92Vgt
+  api_secret: TRmrXbFnUbMPJQzDGsgQ6rSGxDzpzREsSShQBKgxWYO
+  # Увеличиваем таймауты
+  timeout: 10s
+  
+redis:
+  address: voice-ai-redis-simple:6379
+
+# Настройки для входящих звонков
+sip_trunks:
+- name: novofon-inbound
+  inbound_only: true
+  # ОТКЛЮЧАЕМ аутентификацию полностью
+  auth_required: false
+  # Разрешаем все IP
+  allowed_ips: []
+  # Разрешаем все номера
+  allowed_numbers: []
+
+# Простая маршрутизация БЕЗ фильтров
+routing:
+  inbound_rules:
+  - name: accept-all
+    # БЕЗ match - принимаем ВСЕ звонки
+    action:
+      type: livekit_room
+      room_name_template: "voice-ai-call-{call_id}"
+      participant_name: "caller"
+      participant_identity: "{caller_number}"
+
+webhooks:
+  enabled: true
+  url: http://agentio.ru:8000/webhooks/livekit
+  secret: voice-ai-agent-secret-key-change-in-production
+
+logging:
+  level: DEBUG

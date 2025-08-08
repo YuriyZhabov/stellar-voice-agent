@@ -1,0 +1,61 @@
+health_check:
+  enabled: true
+  endpoint: /health/sip
+  interval: 30
+  timeout: 10
+livekit:
+  api_key: API48Ajeeuv4tYL
+  api_secret: Q5eag53mO3WVhUcoRGmI5Y1wjDbCFnf7qn6pJOzakHN
+  connection:
+    keep_alive: 25000
+    max_reconnect_attempts: 10
+    reconnect: true
+    reconnect_delay: 1000
+    timeout: 30000
+  retry_attempts: 5
+  timeout: 30s
+  url: wss://voice-mz90cpgw.livekit.cloud
+logging:
+  level: INFO
+redis:
+  address: voice-ai-redis-simple:6379
+routing:
+  inbound_rules:
+  - action:
+      metadata:
+        webhook_url: http://agentio.ru:8000/webhooks/livekit
+      participant_identity: '{caller_number}'
+      participant_name: caller
+      room_name_template: voice-ai-call-{call_id}
+      type: livekit_room
+    match:
+      to: '79952227978'
+      trunk: novofon-trunk
+    name: voice-ai-routing
+sip_trunks:
+- auth_password: s8zrerUKYC
+  auth_username: 0053248
+  host: sip.novofon.ru
+  name: novofon-trunk
+  password: s8zrerUKYC
+  port: 5060
+  register: true
+  register_interval: 300
+  transport: UDP
+  username: 0053248
+webhooks:
+  enabled: true
+  events:
+  - room_started
+  - room_finished
+  - participant_joined
+  - participant_left
+  retry:
+    enabled: true
+    initial_delay: 1000
+    max_attempts: 5
+    max_delay: 30000
+    multiplier: 2.0
+  secret: voice-ai-agent-secret-key-change-in-production
+  timeout: 10000
+  url: http://agentio.ru:8000/webhooks/livekit

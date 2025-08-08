@@ -1,0 +1,106 @@
+# Deployment Configuration for LiveKit System
+# Конфигурация развертывания для системы LiveKit
+
+environments:
+  development:
+    compose_file: "docker-compose.yml"
+    env_file: ".env"
+    health_check_url: "http://localhost:8000/health"
+    pre_deployment_checks:
+      - "lint"
+      - "unit_tests"
+    post_deployment_checks:
+      - "health_check"
+      - "integration_tests"
+    
+  staging:
+    compose_file: "docker-compose.staging.yml"
+    env_file: ".env.staging"
+    health_check_url: "http://staging.localhost:8000/health"
+    pre_deployment_checks:
+      - "lint"
+      - "unit_tests"
+      - "security_scan"
+    post_deployment_checks:
+      - "health_check"
+      - "integration_tests"
+      - "smoke_tests"
+    
+  production:
+    compose_file: "docker-compose.prod.yml"
+    env_file: ".env.production"
+    health_check_url: "http://production.localhost:8000/health"
+    pre_deployment_checks:
+      - "lint"
+      - "unit_tests"
+      - "security_scan"
+      - "performance_tests"
+    post_deployment_checks:
+      - "health_check"
+      - "integration_tests"
+      - "smoke_tests"
+      - "monitoring_check"
+    blue_green: true
+    rollback_on_failure: true
+
+# Test and validation commands
+checks:
+  lint:
+    command: ["python", "-m", "flake8", "src/", "--max-line-length=100"]
+    timeout: 60
+    
+  unit_tests:
+    command: ["python", "-m", "pytest", "tests/", "-v", "--tb=short"]
+    timeout: 300
+    
+  security_scan:
+    command: ["python", "-m", "bandit", "-r", "src/", "-f", "json"]
+    timeout: 120
+    
+  performance_tests:
+    command: ["python", "test_performance_final.py"]
+    timeout: 600
+    
+  integration_tests:
+    command: ["python", "test_integration_simple.py"]
+    timeout: 300
+    
+  smoke_tests:
+    command: ["python", "scripts/staging_environment_tests.py", "--suite", "infrastructure"]
+    timeout: 180
+    
+  health_check:
+    command: ["python", "scripts/health_check_deployment.py"]
+    timeout: 60
+    
+  monitoring_check:
+    command: ["python", "scripts/validate_monitoring.py"]
+    timeout: 120
+
+# Notification settings
+notifications:
+  enabled: true
+  webhook_url: "${DEPLOYMENT_WEBHOOK_URL}"
+  channels:
+    - "slack"
+    - "email"
+  
+# Rollback configuration
+rollback:
+  auto_rollback: true
+  rollback_timeout: 300
+  health_check_retries: 3
+  cleanup_delay: 300
+
+# Blue-Green deployment settings
+blue_green:
+  health_check_timeout: 60
+  traffic_switch_delay: 30
+  cleanup_delay: 300
+  
+# Performance thresholds
+performance_thresholds:
+  response_time_ms: 1000
+  memory_usage_mb: 512
+  cpu_usage_percent: 80
+  error_rate_percent: 5

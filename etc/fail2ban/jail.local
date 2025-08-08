@@ -1,0 +1,91 @@
+[DEFAULT]
+# Время блокировки в секундах (30 минут)
+bantime = 1800
+
+# Время окна для подсчета попыток (10 минут)
+findtime = 600
+
+# Максимальное количество попыток
+maxretry = 5
+
+# Игнорируемые IP (добавьте свои доверенные IP)
+ignoreip = 127.0.0.1/8 ::1
+
+# Действие при блокировке
+banaction = ufw
+
+# SSH защита
+[sshd]
+enabled = true
+port = ssh
+filter = sshd
+logpath = /var/log/auth.log
+maxretry = 3
+bantime = 3600
+
+# Apache защита (если используется)
+[apache-auth]
+enabled = false
+port = http,https
+filter = apache-auth
+logpath = /var/log/apache*/*error.log
+maxretry = 6
+
+[apache-badbots]
+enabled = false
+port = http,https
+filter = apache-badbots
+logpath = /var/log/apache*/*access.log
+maxretry = 2
+
+[apache-noscript]
+enabled = false
+port = http,https
+filter = apache-noscript
+logpath = /var/log/apache*/*access.log
+maxretry = 6
+
+[apache-overflows]
+enabled = false
+port = http,https
+filter = apache-overflows
+logpath = /var/log/apache*/*error.log
+maxretry = 2
+
+# Nginx защита (если используется)
+[nginx-http-auth]
+enabled = false
+port = http,https
+filter = nginx-http-auth
+logpath = /var/log/nginx/error.log
+maxretry = 6
+
+[nginx-limit-req]
+enabled = false
+port = http,https
+filter = nginx-limit-req
+logpath = /var/log/nginx/error.log
+maxretry = 10
+
+[nginx-botsearch]
+enabled = false
+port = http,https
+filter = nginx-botsearch
+logpath = /var/log/nginx/access.log
+maxretry = 2
+
+# Postfix защита (если используется почтовый сервер)
+[postfix]
+enabled = false
+port = smtp,465,submission
+filter = postfix
+logpath = /var/log/mail.log
+maxretry = 3
+
+# Dovecot защита (если используется почтовый сервер)
+[dovecot]
+enabled = false
+port = pop3,pop3s,imap,imaps,submission,465,sieve
+filter = dovecot
+logpath = /var/log/mail.log
+maxretry = 3

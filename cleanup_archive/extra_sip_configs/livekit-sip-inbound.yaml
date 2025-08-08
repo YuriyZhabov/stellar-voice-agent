@@ -1,0 +1,74 @@
+# РАБОЧАЯ КОНФИГУРАЦИЯ ДЛЯ ВХОДЯЩИХ ЗВОНКОВ
+# Исправлена проблема с auth check failed
+
+livekit:
+  url: wss://voice-mz90cpgw.livekit.cloud
+  api_key: API48Ajeeuv4tYL
+  api_secret: Q5eag53mO3WVhUcoRGmI5Y1wjDbCFnf7qn6pJOzakHN
+  # Увеличиваем timeout и retry для стабильности
+  timeout: 60s
+  retry_attempts: 10
+  connection:
+    timeout: 60000
+    keep_alive: 30000
+    reconnect: true
+    max_reconnect_attempts: 20
+    reconnect_delay: 2000
+
+redis:
+  address: voice-ai-redis-simple:6379
+
+# SIP TRUNK для входящих звонков
+sip_trunks:
+- name: novofon-inbound
+  host: sip.novofon.ru
+  port: 5060
+  transport: UDP
+  username: 0053248
+  password: s8zrerUKYC
+  register: false
+  inbound: true
+  outbound: false
+  # Добавляем настройки для стабильности
+  auth_username: 0053248
+  auth_password: s8zrerUKYC
+  headers:
+    User-Agent: LiveKit-SIP-Inbound/1.0
+
+# МАРШРУТИЗАЦИЯ входящих звонков
+routing:
+  inbound_rules:
+  - name: accept-inbound-calls
+    match:
+      to: "79952227978"
+      trunk: novofon-inbound
+    action:
+      type: livekit_room
+      room_name_template: "voice-call-{call_id}"
+      participant_name: "caller"
+      participant_identity: "{caller_number}"
+      metadata:
+        webhook_url: "http://agentio.ru:8000/webhooks/livekit"
+        call_type: "inbound"
+        service: "voice-ai-agent"
+
+# Webhook с увеличенными таймаутами
+webhooks:
+  enabled: true
+  url: http://agentio.ru:8000/webhooks/livekit
+  secret: voice-ai-agent-secret-key-change-in-production
+  timeout: 30000  # 30 секунд
+  events:
+  - room_started
+  - room_finished
+  - participant_joined
+  - participant_left
+  retry:
+    enabled: true
+    max_attempts: 10
+    initial_delay: 2000
+    max_delay: 60000
+    multiplier: 2.0
+
+logging:
+  level: DEBUG  # Включаем подробные логи

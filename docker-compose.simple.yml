@@ -1,0 +1,76 @@
+# Simplified Docker Compose for Voice AI Agent (without monitoring)
+services:
+  voice-ai-agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    image: voice-ai-agent:production
+    container_name: voice-ai-agent-simple
+    restart: unless-stopped
+    environment:
+      - ENVIRONMENT=production
+      - LOG_LEVEL=INFO
+      - ENABLE_METRICS=false  # Disable metrics collection
+      - ENABLE_CONSOLE_LOGGING=true
+    env_file:
+      - .env.production
+    ports:
+      - "8000:8000"
+      - "8001:8001"  # Health check port
+    volumes:
+      - ./logs:/app/logs
+      - ./data:/app/data
+    networks:
+      - voice-ai-network
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "/app/healthcheck.py"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  redis:
+    image: redis:7-alpine
+    container_name: voice-ai-redis-simple
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - voice-ai-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  livekit-sip:
+    build:
+      context: .
+      dockerfile: Dockerfile.livekit-sip
+    container_name: voice-ai-livekit-sip
+    restart: unless-stopped
+    ports:
+      - "5060:5060/udp"
+      - "10000-10100:10000-10100/udp"
+    environment:
+      - LIVEKIT_URL=wss://voice-mz90cpgw.livekit.cloud
+      - LIVEKIT_API_KEY=API48Ajeeuv4tYL
+      - LIVEKIT_API_SECRET=Q5eag53mO3WVhUcoRGmI5Y1wjDbCFnf7qn6pJOzakHN
+    networks:
+      - voice-ai-network
+    depends_on:
+      - voice-ai-agent
+
+networks:
+  voice-ai-network:
+    driver: bridge
+
+volumes:
+  redis_data:
+    driver: local

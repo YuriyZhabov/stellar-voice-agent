@@ -1,0 +1,30 @@
+# ПРОСТАЯ КОНФИГУРАЦИЯ ДЛЯ ВХОДЯЩИХ ЗВОНКОВ
+# Минимальная настройка без аутентификации
+
+livekit:
+  url: wss://voice-mz90cpgw.livekit.cloud
+  api_key: APIJrnqBwqxL2N6
+  api_secret: vd2Kjxdilq1lDpJw8lG6NjHpXDyRUjaywJEzt4akZ0P
+
+redis:
+  address: voice-ai-redis-simple:6379
+
+# Простая настройка для входящих звонков
+routing:
+  inbound_rules:
+  - name: accept-all
+    # Принимаем ВСЕ входящие звонки
+    action:
+      type: livekit_room
+      room_name_template: "voice-call-{call_id}"
+      participant_name: "caller"
+      participant_identity: "{caller_number}"
+
+# Webhook
+webhooks:
+  enabled: true
+  url: http://agentio.ru:8000/webhooks/livekit
+  secret: voice-ai-agent-secret-key-change-in-production
+
+logging:
+  level: DEBUG

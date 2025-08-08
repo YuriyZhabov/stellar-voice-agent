@@ -1,0 +1,44 @@
+# РАБОЧАЯ КОНФИГУРАЦИЯ ДЛЯ ВХОДЯЩИХ ЗВОНКОВ
+# Настроена специально для приема звонков от Novofon
+
+livekit:
+  url: wss://voice-mz90cpgw.livekit.cloud
+  api_key: API48Ajeeuv4tYL
+  api_secret: Q5eag53mO3WVhUcoRGmI5Y1wjDbCFnf7qn6pJOzakHN
+
+redis:
+  address: voice-ai-redis-simple:6379
+
+# ГЛАВНОЕ - настройка для ВХОДЯЩИХ звонков
+sip_trunks:
+- name: novofon-inbound
+  # НЕ подключаемся к Novofon, а ПРИНИМАЕМ от них
+  inbound_only: true
+  # Разрешаем входящие звонки БЕЗ аутентификации
+  auth_required: false
+  # Принимаем звонки на наш номер
+  allowed_numbers:
+  - "79952227978"
+  - "+79952227978"
+
+# Маршрутизация ВХОДЯЩИХ звонков
+routing:
+  inbound_rules:
+  - name: accept-all-inbound
+    # Принимаем ВСЕ входящие звонки на наш номер
+    match:
+      to: "79952227978"
+    action:
+      type: livekit_room
+      room_name_template: "call-{call_id}"
+      participant_name: "caller"
+      participant_identity: "{caller_number}"
+
+# Webhook для уведомлений
+webhooks:
+  enabled: true
+  url: http://agentio.ru:8000/webhooks/livekit
+  secret: voice-ai-agent-secret-key-change-in-production
+
+logging:
+  level: DEBUG

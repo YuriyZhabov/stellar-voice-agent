@@ -1,0 +1,523 @@
+# Security Configuration
+# Конфигурация безопасности LiveKit согласно спецификации и требованиям
+
+# =============================================================================
+# ОБЩИЕ НАСТРОЙКИ БЕЗОПАСНОСТИ
+# =============================================================================
+
+security:
+  # Основные настройки
+  enabled: true
+  strict_mode: true  # Строгий режим безопасности
+  audit_logging: true
+  
+  # Настройки шифрования
+  encryption:
+    enforce_tls: true
+    min_tls_version: "1.2"
+    cipher_suites:
+      - "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"
+      - "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"
+      - "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305"
+    
+  # Настройки CORS
+  cors:
+    enabled: true
+    allowed_origins:
+      - "https://*.livekit.cloud"
+      - "wss://*.livekit.cloud"
+      - "${DOMAIN}"
+    allowed_methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+    allowed_headers: ["Authorization", "Content-Type", "X-Requested-With"]
+    max_age: 86400  # 24 часа
+
+# =============================================================================
+# АУТЕНТИФИКАЦИЯ И АВТОРИЗАЦИЯ
+# =============================================================================
+
+authentication:
+  # JWT настройки
+  jwt:
+    # Алгоритмы подписи
+    allowed_algorithms: ["HS256"]
+    verify_signature: true
+    verify_expiration: true
+    verify_not_before: true
+    verify_issued_at: true
+    
+    # Время жизни токенов
+    token_lifetimes:
+      participant: 600      # 10 минут
+      admin: 3600          # 1 час
+      service: 86400       # 24 часа (для внутренних сервисов)
+      
+    # Автоматическое обновление
+    auto_refresh:
+      enabled: true
+      threshold_seconds: 60  # Обновлять за 60 секунд до истечения
+      max_refresh_attempts: 3
+      
+    # Валидация токенов
+    validation:
+      check_issuer: true
+      check_audience: false  # LiveKit не использует audience
+      check_subject: true
+      require_video_grants: true
+      
+  # API ключи
+  api_keys:
+    # Ротация ключей
+    rotation:
+      enabled: true
+      rotation_interval_days: 90
+      overlap_period_days: 7  # Период перекрытия старых и новых ключей
+      
+    # Валидация ключей
+    validation:
+      min_length: 16
+      require_alphanumeric: true
+      check_entropy: true
+      min_entropy_bits: 128
+      
+    # Хранение ключей
+    storage:
+      encrypt_at_rest: true
+      mask_in_logs: true
+      audit_access: true
+
+# =============================================================================
+# АВТОРИЗАЦИЯ И ПРАВА ДОСТУПА
+# =============================================================================
+
+authorization:
+  # Права доступа согласно VideoGrants спецификации
+  video_grants:
+    # Права на комнаты
+    room_permissions:
+      room_create:
+        description: "Создание комнат"
+        required_for: ["admin", "service"]
+        
+      room_list:
+        description: "Просмотр списка комнат"
+        required_for: ["admin", "service"]
+        
+      room_join:
+        description: "Подключение к комнате"
+        required_for: ["participant", "admin", "service"]
+        
+      room_admin:
+        description: "Администрирование комнаты"
+        required_for: ["admin", "service"]
+        
+      room_record:
+        description: "Запись комнаты"
+        required_for: ["admin", "service"]
+        
+    # Права на участников
+    participant_permissions:
+      can_publish:
+        description: "Публикация медиа"
+        required_for: ["participant", "admin"]
+        
+      can_subscribe:
+        description: "Подписка на медиа"
+        required_for: ["participant", "admin", "viewer"]
+        
+      can_publish_data:
+        description: "Отправка данных"
+        required_for: ["participant", "admin"]
+        
+      can_update_own_metadata:
+        description: "Обновление собственных метаданных"
+        required_for: ["participant", "admin"]
+        
+      can_publish_sources:
+        description: "Публикация определенных источников"
+        allowed_sources: ["camera", "microphone", "screen_share"]
+        
+    # Права на Ingress/Egress
+    media_permissions:
+      ingress_admin:
+        description: "Администрирование Ingress"
+        required_for: ["admin", "service"]
+        
+      egress_admin:
+        description: "Администрирование Egress"
+        required_for: ["admin", "service"]
+        
+  # Роли пользователей
+  roles:
+    participant:
+      description: "Обычный участник комнаты"
+      grants:
+        room_join: true
+        can_publish: true
+        can_subscribe: true
+        can_publish_data: true
+        can_update_own_metadata: true
+        
+    viewer:
+      description: "Только просмотр"
+      grants:
+        room_join: true
+        can_subscribe: true
+        can_publish: false
+        can_publish_data: false
+        
+    admin:
+      description: "Администратор системы"
+      grants:
+        room_create: true
+        room_list: true
+        room_join: true
+        room_admin: true
+        room_record: true
+        can_publish: true
+        can_subscribe: true
+        can_publish_data: true
+        can_update_own_metadata: true
+        ingress_admin: true
+        egress_admin: true
+        
+    service:
+      description: "Внутренний сервис"
+      grants:
+        room_create: true
+        room_list: true
+        room_admin: true
+        room_record: true
+        ingress_admin: true
+        egress_admin: true
+
+# =============================================================================
+# ЗАЩИТА ОТ АТАК
+# =============================================================================
+
+attack_protection:
+  # Rate limiting
+  rate_limiting:
+    enabled: true
+    
+    # Глобальные лимиты
+    global:
+      requests_per_minute: 1000
+      requests_per_hour: 10000
+      
+    # Лимиты по IP
+    per_ip:
+      requests_per_minute: 60
+      requests_per_hour: 1000
+      
+    # Лимиты по пользователю
+    per_user:
+      requests_per_minute: 100
+      requests_per_hour: 2000
+      
+    # Лимиты по эндпоинтам
+    per_endpoint:
+      create_room:
+        requests_per_minute: 10
+        requests_per_hour: 100
+        
+      join_room:
+        requests_per_minute: 30
+        requests_per_hour: 500
+        
+      create_token:
+        requests_per_minute: 20
+        requests_per_hour: 200
+        
+  # Защита от брутфорса
+  brute_force_protection:
+    enabled: true
+    max_failed_attempts: 5
+    lockout_duration_minutes: 15
+    progressive_delays: true  # Увеличивающиеся задержки
+    
+  # DDoS защита
+  ddos_protection:
+    enabled: true
+    connection_limit_per_ip: 10
+    request_size_limit_mb: 10
+    timeout_seconds: 30
+    
+  # Защита от инъекций
+  injection_protection:
+    enabled: true
+    sql_injection_detection: true
+    xss_protection: true
+    command_injection_detection: true
+
+# =============================================================================
+# МОНИТОРИНГ БЕЗОПАСНОСТИ
+# =============================================================================
+
+security_monitoring:
+  # Аудит событий
+  audit_events:
+    enabled: true
+    log_level: "INFO"
+    
+    # События для аудита
+    events:
+      - "authentication_success"
+      - "authentication_failure"
+      - "authorization_failure"
+      - "token_creation"
+      - "token_validation_failure"
+      - "api_key_usage"
+      - "room_creation"
+      - "participant_join"
+      - "participant_removal"
+      - "permission_escalation"
+      - "suspicious_activity"
+      
+  # Детекция аномалий
+  anomaly_detection:
+    enabled: true
+    
+    # Пороги для детекции
+    thresholds:
+      failed_auth_rate: 0.1      # 10% неудачных аутентификаций
+      unusual_api_usage: 5.0     # В 5 раз больше обычного
+      geographic_anomaly: true   # Подключения из необычных локаций
+      time_anomaly: true         # Подключения в необычное время
+      
+  # Алерты безопасности
+  security_alerts:
+    enabled: true
+    
+    # Критические алерты
+    critical_alerts:
+      - name: "multiple_failed_auth"
+        condition: "failed_auth_attempts > 10 in 5m"
+        action: "block_ip"
+        
+      - name: "token_validation_failures"
+        condition: "token_validation_failures > 20 in 5m"
+        action: "alert_admin"
+        
+      - name: "suspicious_api_usage"
+        condition: "api_requests > normal * 10 in 10m"
+        action: "rate_limit"
+        
+    # Предупреждающие алерты
+    warning_alerts:
+      - name: "unusual_geographic_access"
+        condition: "new_country_access"
+        action: "log_and_monitor"
+        
+      - name: "off_hours_access"
+        condition: "access_outside_business_hours"
+        action: "log_and_monitor"
+
+# =============================================================================
+# КОНФИДЕНЦИАЛЬНОСТЬ ДАННЫХ
+# =============================================================================
+
+data_privacy:
+  # Защита персональных данных
+  personal_data:
+    encryption_at_rest: true
+    encryption_in_transit: true
+    data_minimization: true
+    
+    # Маскирование в логах
+    log_masking:
+      enabled: true
+      mask_patterns:
+        - "phone_number"
+        - "email"
+        - "ip_address"
+        - "user_agent"
+        
+  # Управление данными
+  data_management:
+    # Автоматическое удаление
+    auto_deletion:
+      enabled: true
+      retention_periods:
+        call_logs: 90        # дни
+        session_data: 30     # дни
+        audit_logs: 365      # дни
+        error_logs: 90       # дни
+        
+    # Право на забвение
+    right_to_be_forgotten:
+      enabled: true
+      deletion_methods: ["secure_wipe", "cryptographic_erasure"]
+      
+  # Согласие пользователей
+  consent_management:
+    enabled: true
+    require_explicit_consent: true
+    consent_storage_duration: 1095  # 3 года
+    allow_consent_withdrawal: true
+
+# =============================================================================
+# СЕТЕВАЯ БЕЗОПАСНОСТЬ
+# =============================================================================
+
+network_security:
+  # Настройки соединений
+  connections:
+    # Обязательное использование WSS
+    enforce_wss: true
+    allow_ws_fallback: false
+    
+    # Валидация сертификатов
+    verify_ssl_certificates: true
+    check_certificate_revocation: true
+    
+    # Настройки таймаутов
+    connection_timeout: 30
+    read_timeout: 60
+    write_timeout: 30
+    
+  # Фильтрация трафика
+  traffic_filtering:
+    enabled: true
+    
+    # Белые списки
+    ip_whitelist:
+      enabled: false  # Отключено для публичного доступа
+      allowed_ranges: []
+      
+    # Черные списки
+    ip_blacklist:
+      enabled: true
+      blocked_ranges:
+        - "10.0.0.0/8"      # Частные сети (если не нужны)
+        - "172.16.0.0/12"   # Частные сети
+        - "192.168.0.0/16"  # Частные сети
+        
+    # Геоблокировка
+    geo_blocking:
+      enabled: false  # Отключено для международного доступа
+      blocked_countries: []
+      
+  # Защита протокола
+  protocol_security:
+    # WebSocket защита
+    websocket:
+      max_frame_size: 1048576  # 1MB
+      max_message_size: 10485760  # 10MB
+      compression_enabled: false  # Отключено для безопасности
+      
+    # HTTP защита
+    http:
+      max_request_size: 10485760  # 10MB
+      max_header_size: 8192       # 8KB
+      disable_trace_method: true
+      hide_server_header: true
+
+# =============================================================================
+# COMPLIANCE И СТАНДАРТЫ
+# =============================================================================
+
+compliance:
+  # Соответствие стандартам
+  standards:
+    # GDPR соответствие
+    gdpr:
+      enabled: true
+      data_protection_officer: "${DPO_EMAIL}"
+      privacy_policy_url: "${PRIVACY_POLICY_URL}"
+      
+    # SOC 2 соответствие
+    soc2:
+      enabled: true
+      security_controls: true
+      availability_controls: true
+      confidentiality_controls: true
+      
+    # ISO 27001 соответствие
+    iso27001:
+      enabled: true
+      information_security_policy: true
+      risk_management: true
+      incident_response: true
+      
+  # Аудит соответствия
+  compliance_audit:
+    enabled: true
+    audit_frequency: "quarterly"
+    automated_checks: true
+    manual_reviews: true
+    
+    # Отчеты о соответствии
+    reporting:
+      enabled: true
+      report_frequency: "monthly"
+      include_metrics: true
+      include_violations: true
+
+# =============================================================================
+# ИНЦИДЕНТ-МЕНЕДЖМЕНТ
+# =============================================================================
+
+incident_management:
+  # Обнаружение инцидентов
+  detection:
+    enabled: true
+    automated_detection: true
+    manual_reporting: true
+    
+    # Классификация инцидентов
+    severity_levels:
+      critical:
+        description: "Критический инцидент безопасности"
+        response_time: 15  # минут
+        escalation_time: 30  # минут
+        
+      high:
+        description: "Высокий уровень угрозы"
+        response_time: 60  # минут
+        escalation_time: 120  # минут
+        
+      medium:
+        description: "Средний уровень угрозы"
+        response_time: 240  # минут
+        escalation_time: 480  # минут
+        
+      low:
+        description: "Низкий уровень угрозы"
+        response_time: 1440  # минут (24 часа)
+        escalation_time: 2880  # минут (48 часов)
+        
+  # Реагирование на инциденты
+  response:
+    enabled: true
+    
+    # Автоматические действия
+    automated_actions:
+      block_suspicious_ip: true
+      revoke_compromised_tokens: true
+      isolate_affected_rooms: true
+      notify_administrators: true
+      
+    # Команда реагирования
+    response_team:
+      primary_contact: "${SECURITY_TEAM_EMAIL}"
+      escalation_contact: "${SECURITY_MANAGER_EMAIL}"
+      external_contact: "${EXTERNAL_SECURITY_CONSULTANT}"
+      
+  # Восстановление после инцидентов
+  recovery:
+    enabled: true
+    
+    # Процедуры восстановления
+    procedures:
+      assess_damage: true
+      contain_threat: true
+      eradicate_threat: true
+      recover_systems: true
+      lessons_learned: true
+      
+    # Документирование
+    documentation:
+      incident_reports: true
+      timeline_reconstruction: true
+      impact_assessment: true
+      improvement_recommendations: true

@@ -1,0 +1,30 @@
+{
+  "timestamp": "2025-08-03T04:21:14.065450",
+  "containers": {
+    "voice-ai-livekit-sip": true,
+    "voice-ai-agent-simple": true,
+    "voice-ai-redis-simple": true
+  },
+  "network": {
+    "livekit_server": true,
+    "webhook_endpoint": true,
+    "novofon_sip": true
+  },
+  "livekit_auth": true,
+  "sip_config": true,
+  "ports": {
+    "5060": false,
+    "8000": true,
+    "6379": true
+  },
+  "logs": {
+    "auth_failures": 0,
+    "processing_invites": 0,
+    "server_starting": 0,
+    "connection_errors": 0,
+    "registration_attempts": 0
+  },
+  "recommendations": [
+    "Все основные компоненты работают корректно"
+  ]
+}

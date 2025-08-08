@@ -1,0 +1,10 @@
+FROM livekit/sip:latest
+
+# Copy FIXED config
+COPY livekit-sip-FIXED.yaml /sip/config.yaml
+
+# Set working directory
+WORKDIR /sip
+
+# Run the SIP service
+CMD ["livekit-sip", "--config=/sip/config.yaml"]

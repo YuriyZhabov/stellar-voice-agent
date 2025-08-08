@@ -1,0 +1,349 @@
+{
+  "timestamp": "2025-08-01T08:16:30.569795+00:00",
+  "metrics": [
+    {
+      "name": "sip_trunk_status{trunk=novofon-trunk}",
+      "value": 1,
+      "timestamp": 1754036190.5696223,
+      "labels": {
+        "trunk": "novofon-trunk"
+      },
+      "type": "gauge"
+    },
+    {
+      "name": "component_health_status{component=stt_client,type=stt_client}",
+      "value": 1,
+      "timestamp": 1754036190.5696428,
+      "labels": {
+        "component": "stt_client",
+        "type": "stt_client"
+      },
+      "type": "gauge"
+    },
+    {
+      "name": "component_health_status{component=llm_client,type=llm_client}",
+      "value": 1,
+      "timestamp": 1754036190.5696507,
+      "labels": {
+        "component": "llm_client",
+        "type": "llm_client"
+      },
+      "type": "gauge"
+    },
+    {
+      "name": "component_health_status{component=tts_client,type=tts_client}",
+      "value": 1,
+      "timestamp": 1754036190.5696557,
+      "labels": {
+        "component": "tts_client",
+        "type": "tts_client"
+      },
+      "type": "gauge"
+    },
+    {
+      "name": "sip_trunk_response_time{trunk=novofon-trunk}_count",
+      "value": 1,
+      "timestamp": 1754036190.5696661,
+      "labels": {
+        "trunk": "novofon-trunk"
+      },
+      "type": "counter"
+    },
+    {
+      "name": "sip_trunk_response_time{trunk=novofon-trunk}_sum",
+      "value": 0.00014400482177734375,
+      "timestamp": 1754036190.5696714,
+      "labels": {
+        "trunk": "novofon-trunk"
+      },
+      "type": "counter"
+    },
+    {
+      "name": "sip_trunk_response_time{trunk=novofon-trunk}_avg",
+      "value": 0.00014400482177734375,
+      "timestamp": 1754036190.5696752,
+      "labels": {
+        "trunk": "novofon-trunk"
+      },
+      "type": "gauge"
+    },
+    {
+      "name": "sip_trunk_response_time{trunk=novofon-trunk}_min",
+      "value": 0.00014400482177734375,
+      "timestamp": 1754036190.5696785,
+      "labels": {
+        "trunk": "novofon-trunk"
+      },
+      "type": "gauge"
+    },
+    {
+      "name": "sip_trunk_response_time{trunk=novofon-trunk}_max",
+      "value": 0.00014400482177734375,
+      "timestamp": 1754036190.5696814,
+      "labels": {
+        "trunk": "novofon-trunk"
+      },
+      "type": "gauge"
+    },
+    {
+      "name": "sip_trunk_response_time{trunk=novofon-trunk}_p50",
+      "value": 0.00014400482177734375,
+      "timestamp": 1754036190.5696838,
+      "labels": {
+        "trunk": "novofon-trunk"
+      },
+      "type": "gauge"
+    },
+    {
+      "name": "sip_trunk_response_time{trunk=novofon-trunk}_p95",
+      "value": 0.00014400482177734375,
+      "timestamp": 1754036190.5696871,
+      "labels": {
+        "trunk": "novofon-trunk"
+      },
+      "type": "gauge"
+    },
+    {
+      "name": "sip_trunk_response_time{trunk=novofon-trunk}_p99",
+      "value": 0.00014400482177734375,
+      "timestamp": 1754036190.5696898,
+      "labels": {
+        "trunk": "novofon-trunk"
+      },
+      "type": "gauge"
+    },
+    {
+      "name": "component_health_response_time_ms{component=stt_client}_count",
+      "value": 1,
+      "timestamp": 1754036190.5696983,
+      "labels": {
+        "component": "stt_client"
+      },
+      "type": "counter"
+    },
+    {
+      "name": "component_health_response_time_ms{component=stt_client}_sum",
+      "value": 0.06556510925292969,
+      "timestamp": 1754036190.5697021,
+      "labels": {
+        "component": "stt_client"
+      },
+      "type": "counter"
+    },
+    {
+      "name": "component_health_response_time_ms{component=stt_client}_avg",
+      "value": 0.06556510925292969,
+      "timestamp": 1754036190.5697052,
+      "labels": {
+        "component": "stt_client"
+      },
+      "type": "gauge"
+    },
+    {
+      "name": "component_health_response_time_ms{component=stt_client}_min",
+      "value": 0.06556510925292969,
+      "timestamp": 1754036190.569708,
+      "labels": {
+        "component": "stt_client"
+      },
+      "type": "gauge"
+    },
+    {
+      "name": "component_health_response_time_ms{component=stt_client}_max",
+      "value": 0.06556510925292969,
+      "timestamp": 1754036190.5697105,
+      "labels": {
+        "component": "stt_client"
+      },
+      "type": "gauge"
+    },
+    {
+      "name": "component_health_response_time_ms{component=stt_client}_p50",
+      "value": 0.06556510925292969,
+      "timestamp": 1754036190.5697129,
+      "labels": {
+        "component": "stt_client"
+      },
+      "type": "gauge"
+    },
+    {
+      "name": "component_health_response_time_ms{component=stt_client}_p95",
+      "value": 0.06556510925292969,
+      "timestamp": 1754036190.5697155,
+      "labels": {
+        "component": "stt_client"
+      },
+      "type": "gauge"
+    },
+    {
+      "name": "component_health_response_time_ms{component=stt_client}_p99",
+      "value": 0.06556510925292969,
+      "timestamp": 1754036190.5697184,
+      "labels": {
+        "component": "stt_client"
+      },
+      "type": "gauge"
+    },
+    {
+      "name": "component_health_response_time_ms{component=llm_client}_count",
+      "value": 1,
+      "timestamp": 1754036190.5697243,
+      "labels": {
+        "component": "llm_client"
+      },
+      "type": "counter"
+    },
+    {
+      "name": "component_health_response_time_ms{component=llm_client}_sum",
+      "value": 0.06341934204101562,
+      "timestamp": 1754036190.5697274,
+      "labels": {
+        "component": "llm_client"
+      },
+      "type": "counter"
+    },
+    {
+      "name": "component_health_response_time_ms{component=llm_client}_avg",
+      "value": 0.06341934204101562,
+      "timestamp": 1754036190.56973,
+      "labels": {
+        "component": "llm_client"
+      },
+      "type": "gauge"
+    },
+    {
+      "name": "component_health_response_time_ms{component=llm_client}_min",
+      "value": 0.06341934204101562,
+      "timestamp": 1754036190.5697322,
+      "labels": {
+        "component": "llm_client"
+      },
+      "type": "gauge"
+    },
+    {
+      "name": "component_health_response_time_ms{component=llm_client}_max",
+      "value": 0.06341934204101562,
+      "timestamp": 1754036190.5697343,
+      "labels": {
+        "component": "llm_client"
+      },
+      "type": "gauge"
+    },
+    {
+      "name": "component_health_response_time_ms{component=llm_client}_p50",
+      "value": 0.06341934204101562,
+      "timestamp": 1754036190.5697367,
+      "labels": {
+        "component": "llm_client"
+      },
+      "type": "gauge"
+    },
+    {
+      "name": "component_health_response_time_ms{component=llm_client}_p95",
+      "value": 0.06341934204101562,
+      "timestamp": 1754036190.569739,
+      "labels": {
+        "component": "llm_client"
+      },
+      "type": "gauge"
+    },
+    {
+      "name": "component_health_response_time_ms{component=llm_client}_p99",
+      "value": 0.06341934204101562,
+      "timestamp": 1754036190.5697415,
+      "labels": {
+        "component": "llm_client"
+      },
+      "type": "gauge"
+    },
+    {
+      "name": "component_health_response_time_ms{component=tts_client}_count",
+      "value": 1,
+      "timestamp": 1754036190.569746,
+      "labels": {
+        "component": "tts_client"
+      },
+      "type": "counter"
+    },
+    {
+      "name": "component_health_response_time_ms{component=tts_client}_sum",
+      "value": 0.05078315734863281,
+      "timestamp": 1754036190.5697482,
+      "labels": {
+        "component": "tts_client"
+      },
+      "type": "counter"
+    },
+    {
+      "name": "component_health_response_time_ms{component=tts_client}_avg",
+      "value": 0.05078315734863281,
+      "timestamp": 1754036190.5697503,
+      "labels": {
+        "component": "tts_client"
+      },
+      "type": "gauge"
+    },
+    {
+      "name": "component_health_response_time_ms{component=tts_client}_min",
+      "value": 0.05078315734863281,
+      "timestamp": 1754036190.5697522,
+      "labels": {
+        "component": "tts_client"
+      },
+      "type": "gauge"
+    },
+    {
+      "name": "component_health_response_time_ms{component=tts_client}_max",
+      "value": 0.05078315734863281,
+      "timestamp": 1754036190.5697548,
+      "labels": {
+        "component": "tts_client"
+      },
+      "type": "gauge"
+    },
+    {
+      "name": "component_health_response_time_ms{component=tts_client}_p50",
+      "value": 0.05078315734863281,
+      "timestamp": 1754036190.569757,
+      "labels": {
+        "component": "tts_client"
+      },
+      "type": "gauge"
+    },
+    {
+      "name": "component_health_response_time_ms{component=tts_client}_p95",
+      "value": 0.05078315734863281,
+      "timestamp": 1754036190.5697598,
+      "labels": {
+        "component": "tts_client"
+      },
+      "type": "gauge"
+    },
+    {
+      "name": "component_health_response_time_ms{component=tts_client}_p99",
+      "value": 0.05078315734863281,
+      "timestamp": 1754036190.569762,
+      "labels": {
+        "component": "tts_client"
+      },
+      "type": "gauge"
+    },
+    {
+      "name": "system_info",
+      "value": 1,
+      "timestamp": 1754036190.5697696,
+      "labels": {
+        "version": "0.1.0",
+        "environment": "development",
+        "instance": "agentio.ru"
+      },
+      "type": "gauge"
+    }
+  ],
+  "metadata": {
+    "total_metrics": 37,
+    "exporters": [
+      "json"
+    ]
+  }
+}

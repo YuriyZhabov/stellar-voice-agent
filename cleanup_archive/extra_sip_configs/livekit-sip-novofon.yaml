@@ -1,0 +1,162 @@
+# LiveKit SIP Configuration for Novofon Integration
+# Настроена для работы как SIP trunk с Novofon
+
+# LiveKit connection
+livekit:
+  url: wss://voice-mz90cpgw.livekit.cloud
+  api_key: API48Ajeeuv4tYL
+  api_secret: Q5eag53mO3WVhUcoRGmI5Y1wjDbCFnf7qn6pJOzakHN
+  timeout: 30s
+  retry_attempts: 5
+  connection:
+    timeout: 30000
+    keep_alive: 25000
+    reconnect: true
+    max_reconnect_attempts: 10
+    reconnect_delay: 1000
+
+# Redis connection
+redis:
+  address: voice-ai-redis-simple:6379
+
+# SIP Trunks - настройка для работы с Novofon
+sip_trunks:
+- name: novofon-trunk
+  # Novofon SIP server
+  host: sip.novofon.ru
+  port: 5060
+  transport: UDP
+  
+  # Authentication credentials
+  username: 0053248
+  password: s8zrerUKYC
+  auth_username: 0053248
+  auth_password: s8zrerUKYC
+  
+  # Trunk configuration
+  register: false  # Не регистрируемся как клиент
+  inbound: true    # Принимаем входящие звонки
+  outbound: false  # Не делаем исходящие звонки
+  
+  # Headers for compatibility
+  headers:
+    User-Agent: LiveKit-SIP/1.0
+    Contact: <sip:79952227978@94.131.122.253:5060>
+  
+  # Network settings
+  local_ip: 94.131.122.253
+  external_ip: 94.131.122.253
+  
+  # RTP settings
+  rtp_port_range:
+    min: 10000
+    max: 10100
+
+# Routing rules for inbound calls
+routing:
+  inbound_rules:
+  - name: novofon-to-livekit
+    # Match incoming calls to our number
+    match:
+      to: '79952227978'
+      trunk: novofon-trunk
+    # Route to LiveKit room
+    action:
+      type: livekit_room
+      room_name_template: voice-ai-call-{call_id}
+      participant_name: caller
+      participant_identity: '{caller_number}'
+      metadata:
+        webhook_url: http://agentio.ru:8000/webhooks/livekit
+        call_type: inbound
+        service: voice-ai-agent
+        trunk: novofon-trunk
+        timestamp: '{timestamp}'
+
+# Webhook configuration
+webhooks:
+  enabled: true
+  url: http://agentio.ru:8000/webhooks/livekit
+  secret: voice-ai-agent-secret-key-change-in-production
+  timeout: 10000
+  events:
+  - room_started
+  - room_finished
+  - participant_joined
+  - participant_left
+  - track_published
+  - track_unpublished
+  retry:
+    enabled: true
+    max_attempts: 5
+    initial_delay: 1000
+    max_delay: 30000
+    multiplier: 2.0
+
+# Logging configuration
+logging:
+  level: INFO
+  format: json
+
+# Health check
+health_check:
+  enabled: true
+  endpoint: /health/sip
+  interval: 30
+  timeout: 10
+
+# Audio codec preferences
+audio_codecs:
+- name: PCMU
+  payload_type: 0
+  sample_rate: 8000
+  channels: 1
+  priority: 1
+- name: PCMA
+  payload_type: 8
+  sample_rate: 8000
+  channels: 1
+  priority: 2
+
+# SIP server settings
+sip_server:
+  # Listen on all interfaces
+  listen_ip: 0.0.0.0
+  listen_port: 5060
+  
+  # External IP for SDP
+  external_ip: 94.131.122.253
+  
+  # Transport protocols
+  transports:
+  - UDP
+  
+  # Authentication settings
+  auth:
+    realm: agentio.ru
+    require_auth: false  # Не требуем аутентификацию для входящих
+  
+  # Session timers
+  session_expires: 1800  # 30 minutes
+  min_se: 90            # 90 seconds
+  
+  # Keep-alive settings
+  keep_alive:
+    enabled: true
+    interval: 30
+    
+# Network configuration
+network:
+  # NAT traversal
+  nat_traversal:
+    enabled: true
+    stun_server: stun.l.google.com:19302
+  
+  # Firewall settings
+  firewall:
+    enabled: false  # Handled by system firewall
+    
+  # Quality of Service
+  qos:
+    dscp_voice: 46
+    dscp_signaling: 24

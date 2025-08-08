@@ -1,0 +1,47 @@
+# Simplified LiveKit SIP Configuration
+sip_trunks:
+  - name: "novofon-trunk"
+    host: "sip.novofon.ru"
+    port: 5060
+    transport: "UDP"
+    username: "0053248"
+    password: "s8zrerUKYC"
+    register: true
+    register_interval: 300
+
+routing:
+  inbound_rules:
+    - name: "voice-ai-routing"
+      match:
+        to: "79952227978"  # Без плюса
+        trunk: "novofon-trunk"
+      action:
+        type: "livekit_room"
+        room_name_template: "voice-ai-call-{call_id}"
+        participant_name: "caller"
+        participant_identity: "{caller_number}"
+        metadata:
+          webhook_url: "http://agentio.ru:8000/webhooks/livekit"
+
+livekit:
+  url: "wss://voice-mz90cpgw.livekit.cloud"
+  api_key: "API48Ajeeuv4tYL"
+  api_secret: "Q5eag53mO3WVhUcoRGmI5Y1wjDbCFnf7qn6pJOzakHN"
+  timeout: 30s
+  retry_attempts: 3
+
+webhooks:
+  enabled: true
+  url: "http://agentio.ru:8000/webhooks/livekit"
+  secret: "m-fEv2OD5UFQ4z_8LHIk-kkw2lETL43zMEuew1p2Az1YBV3tVV6YG5aP1ws9cUtoNzKnXO4WTH5S92j2pzw9Pw"
+  events:
+    - "room_started"
+    - "room_finished"
+    - "participant_joined"
+    - "participant_left"
+
+redis:
+  address: "voice-ai-redis-simple:6379"
+
+logging:
+  level: "INFO"

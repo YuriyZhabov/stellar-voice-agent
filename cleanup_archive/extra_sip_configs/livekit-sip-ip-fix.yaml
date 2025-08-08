@@ -1,0 +1,32 @@
+livekit:
+  # Используем IP адрес вместо домена
+  url: wss://140.238.90.61
+  api_key: APIVjiLTSm92Vgt
+  api_secret: TRmrXbFnUbMPJQzDGsgQ6rSGxDzpzREsSShQBKgxWYO
+  timeout: 30s
+  
+redis:
+  address: voice-ai-redis-simple:6379
+
+sip_trunks:
+- name: novofon-inbound
+  inbound_only: true
+  auth_required: false
+  allowed_ips: []
+  allowed_numbers: []
+
+routing:
+  inbound_rules:
+  - name: accept-all
+    action:
+      type: livekit_room
+      room_name_template: "voice-ai-call-{call_id}"
+      participant_name: "caller"
+      participant_identity: "{caller_number}"
+
+webhooks:
+  enabled: true
+  url: http://agentio.ru:8000/webhooks/livekit
+
+logging:
+  level: DEBUG

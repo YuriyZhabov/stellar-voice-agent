@@ -1,0 +1,173 @@
+{
+  "timestamp": "2025-08-03T04:15:30.085275+00:00",
+  "tests": {
+    "Configuration Loading": {
+      "status": "PASS",
+      "message": "Configuration loaded successfully",
+      "details": {
+        "livekit_url": "wss://voice-mz90cpgw.livekit.cloud",
+        "sip_server": "sip.novofon.ru",
+        "sip_number": "+79952227978",
+        "domain": "agentio.ru",
+        "port": 8000
+      }
+    },
+    "Environment Variables": {
+      "status": "WARNING",
+      "message": "Environment variables checked",
+      "details": {
+        "variables": {
+          "LIVEKIT_URL": null,
+          "LIVEKIT_API_KEY": null,
+          "LIVEKIT_API_SECRET": null,
+          "SIP_SERVER": null,
+          "SIP_USERNAME": null,
+          "SIP_PASSWORD": null,
+          "SIP_NUMBER": null,
+          "DOMAIN": null,
+          "PORT": null
+        },
+        "missing": [
+          "LIVEKIT_URL",
+          "LIVEKIT_API_KEY",
+          "LIVEKIT_API_SECRET",
+          "SIP_SERVER",
+          "SIP_USERNAME",
+          "SIP_PASSWORD",
+          "SIP_NUMBER",
+          "DOMAIN",
+          "PORT"
+        ]
+      }
+    },
+    "LiveKit Server Connectivity": {
+      "status": "PASS",
+      "message": "Server reachable (HTTP 200)",
+      "details": {
+        "url": "https://voice-mz90cpgw.livekit.cloud",
+        "status_code": 200,
+        "response_time_ms": 35.36,
+        "headers": {
+          "Content-Length": "2",
+          "Content-Type": "text/plain; charset=utf-8",
+          "Date": "Sun, 03 Aug 2025 04:15:30 GMT",
+          "Vary": "Origin"
+        }
+      }
+    },
+    "API Key Validation": {
+      "status": "PASS",
+      "message": "API key validation successful",
+      "details": {
+        "rooms_found": 0,
+        "response_time_ms": 69.09,
+        "token_generated": true,
+        "api_key_prefix": "APIJrnqB***"
+      }
+    },
+    "Room Operations": {
+      "status": "FAIL",
+      "message": "Room operations failed: Room not found after creation",
+      "error": "Room not found after creation",
+      "traceback": "Traceback (most recent call last):\n  File \"/root/scripts/diagnose_livekit_connection.py\", line 367, in _test_room_operations\n    raise Exception(\"Room not found after creation\")\nException: Room not found after creation\n"
+    },
+    "Webhook Endpoint": {
+      "status": "PASS",
+      "message": "Webhook endpoint accessible",
+      "details": {
+        "webhook_url": "http://agentio.ru:8000/webhooks/livekit",
+        "get_status": 405,
+        "get_response_time_ms": 82.61,
+        "post_status": 200,
+        "post_response_time_ms": 2.79,
+        "accessible": true
+      }
+    },
+    "SIP Configuration": {
+      "status": "PASS",
+      "message": "SIP configuration valid (livekit-sip.yaml, livekit-sip-simple.yaml)",
+      "details": {
+        "livekit-sip.yaml": {
+          "exists": true,
+          "valid_yaml": true,
+          "validation": {
+            "has_sip_trunks": true,
+            "has_livekit_config": true,
+            "has_routing": true,
+            "trunk_count": 1,
+            "codec_count": 4,
+            "issues": [
+              "Trunk 0: Missing field: host, Missing field: username, Missing field: password",
+              "Missing LiveKit field: url",
+              "Missing LiveKit field: api_key",
+              "Missing LiveKit field: api_secret"
+            ]
+          }
+        },
+        "livekit-sip-simple.yaml": {
+          "exists": true,
+          "valid_yaml": true,
+          "validation": {
+            "has_sip_trunks": true,
+            "has_livekit_config": true,
+            "has_routing": true,
+            "trunk_count": 1,
+            "codec_count": 0,
+            "issues": []
+          }
+        }
+      }
+    },
+    "Retry Logic": {
+      "status": "PASS",
+      "message": "Retry logic working correctly",
+      "details": {
+        "max_retries": 3,
+        "actual_retries": 3,
+        "final_success": true,
+        "last_error": "Simulated connection failure (attempt 2)"
+      }
+    },
+    "Error Handling": {
+      "status": "PASS",
+      "message": "Error handling functional (2/2 scenarios)",
+      "details": {
+        "scenarios_tested": 2,
+        "scenarios_handled": 2,
+        "error_scenarios": [
+          {
+            "scenario": "invalid_api_key",
+            "handled": true,
+            "error_type": "ContentTypeError",
+            "error_message": "401, message='Attempt to decode JSON with unexpected mimetype: text/plain; charset=utf-8', url='https://voice-mz90cpgw.livekit.cloud/twirp/livekit.RoomService/ListRooms'"
+          },
+          {
+            "scenario": "invalid_url",
+            "handled": true,
+            "error_type": "ClientConnectorDNSError",
+            "error_message": "Cannot connect to host nonexistent.invalid.domain:443 ssl:default [Name or service not known]"
+          }
+        ]
+      }
+    }
+  },
+  "summary": {
+    "total_tests": 9,
+    "passed": 7,
+    "failed": 1,
+    "warnings": 1,
+    "skipped": 0,
+    "success_rate": 77.8,
+    "overall_status": "ISSUES_FOUND"
+  },
+  "errors": [
+    "Room operations failed: Room not found after creation"
+  ],
+  "warnings": [
+    "Missing environment variables: LIVEKIT_URL, LIVEKIT_API_KEY, LIVEKIT_API_SECRET, SIP_SERVER, SIP_USERNAME, SIP_PASSWORD, SIP_NUMBER, DOMAIN, PORT"
+  ],
+  "recommendations": [
+    "Address failed tests before proceeding with production deployment",
+    "Review warnings and consider addressing them"
+  ]
+}

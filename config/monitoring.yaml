@@ -1,0 +1,516 @@
+# Monitoring Configuration
+# Конфигурация системы мониторинга LiveKit согласно спецификации
+
+# =============================================================================
+# ОБЩИЕ НАСТРОЙКИ МОНИТОРИНГА
+# =============================================================================
+
+monitoring:
+  enabled: true
+  interval: 60  # секунды между проверками
+  timeout: 10   # таймаут для проверок
+  log_level: "INFO"
+  structured_logging: true
+  
+  # Настройки алертов
+  alerting:
+    enabled: true
+    channels:
+      - type: "log"
+        level: "ERROR"
+      - type: "webhook"
+        url: "${MONITORING_WEBHOOK_URL}"
+        timeout: 5
+        retry_attempts: 3
+
+# =============================================================================
+# HEALTH CHECKS КОНФИГУРАЦИЯ
+# =============================================================================
+
+health_checks:
+  # Основные проверки системы
+  system:
+    enabled: true
+    interval: 30
+    timeout: 5
+    
+    checks:
+      - name: "livekit_connection"
+        description: "Проверка подключения к LiveKit серверу"
+        type: "connection"
+        target: "${LIVEKIT_URL}"
+        critical: true
+        
+      - name: "livekit_api_health"
+        description: "Проверка доступности LiveKit API"
+        type: "api"
+        endpoint: "/twirp/livekit.RoomService/ListRooms"
+        method: "POST"
+        critical: true
+        
+      - name: "redis_connection"
+        description: "Проверка подключения к Redis"
+        type: "connection"
+        target: "${REDIS_URL}"
+        critical: true
+        
+      - name: "database_connection"
+        description: "Проверка подключения к базе данных"
+        type: "database"
+        target: "${DATABASE_URL}"
+        critical: true
+
+  # Проверки LiveKit сервисов
+  livekit_services:
+    enabled: true
+    interval: 60
+    timeout: 10
+    
+    checks:
+      - name: "room_service"
+        description: "Проверка RoomService API"
+        type: "api"
+        endpoint: "/twirp/livekit.RoomService/ListRooms"
+        method: "POST"
+        expected_status: [200]
+        critical: true
+        
+      - name: "sip_service"
+        description: "Проверка SIP сервиса"
+        type: "api"
+        endpoint: "/twirp/livekit.SIPService/ListSIPTrunk"
+        method: "POST"
+        expected_status: [200]
+        critical: false
+        
+      - name: "egress_service"
+        description: "Проверка Egress сервиса"
+        type: "api"
+        endpoint: "/twirp/livekit.Egress/ListEgress"
+        method: "POST"
+        expected_status: [200]
+        critical: false
+        
+      - name: "ingress_service"
+        description: "Проверка Ingress сервиса"
+        type: "api"
+        endpoint: "/twirp/livekit.Ingress/ListIngress"
+        method: "POST"
+        expected_status: [200]
+        critical: false
+
+  # Проверки производительности
+  performance:
+    enabled: true
+    interval: 120
+    timeout: 30
+    
+    checks:
+      - name: "api_latency"
+        description: "Проверка латентности API"
+        type: "latency"
+        target: "livekit_api"
+        warning_threshold: 1000  # мс
+        critical_threshold: 3000  # мс
+        
+      - name: "websocket_latency"
+        description: "Проверка латентности WebSocket"
+        type: "latency"
+        target: "livekit_websocket"
+        warning_threshold: 500   # мс
+        critical_threshold: 2000  # мс
+        
+      - name: "memory_usage"
+        description: "Проверка использования памяти"
+        type: "resource"
+        metric: "memory"
+        warning_threshold: 80    # %
+        critical_threshold: 95   # %
+        
+      - name: "cpu_usage"
+        description: "Проверка использования CPU"
+        type: "resource"
+        metric: "cpu"
+        warning_threshold: 80    # %
+        critical_threshold: 95   # %
+
+# =============================================================================
+# МЕТРИКИ КОНФИГУРАЦИЯ
+# =============================================================================
+
+metrics:
+  # Основные настройки метрик
+  collection:
+    enabled: true
+    interval: 30  # секунды
+    retention_days: 30
+    
+  # Экспорт метрик
+  export:
+    enabled: true
+    format: "prometheus"
+    endpoint: "/metrics"
+    port: 9090
+    
+  # Категории метрик
+  categories:
+    # Системные метрики
+    system:
+      enabled: true
+      metrics:
+        - name: "livekit_connections_total"
+          type: "counter"
+          description: "Общее количество подключений к LiveKit"
+          labels: ["status", "type"]
+          
+        - name: "livekit_connections_active"
+          type: "gauge"
+          description: "Активные подключения к LiveKit"
+          labels: ["type"]
+          
+        - name: "livekit_api_requests_total"
+          type: "counter"
+          description: "Общее количество API запросов"
+          labels: ["method", "endpoint", "status"]
+          
+        - name: "livekit_api_request_duration_seconds"
+          type: "histogram"
+          description: "Длительность API запросов"
+          labels: ["method", "endpoint"]
+          buckets: [0.1, 0.5, 1.0, 2.0, 5.0, 10.0]
+    
+    # Метрики комнат
+    rooms:
+      enabled: true
+      metrics:
+        - name: "livekit_rooms_total"
+          type: "counter"
+          description: "Общее количество созданных комнат"
+          labels: ["status"]
+          
+        - name: "livekit_rooms_active"
+          type: "gauge"
+          description: "Активные комнаты"
+          
+        - name: "livekit_room_duration_seconds"
+          type: "histogram"
+          description: "Длительность сессий комнат"
+          buckets: [60, 300, 600, 1800, 3600, 7200]
+          
+        - name: "livekit_participants_total"
+          type: "counter"
+          description: "Общее количество участников"
+          labels: ["room", "status"]
+          
+        - name: "livekit_participants_active"
+          type: "gauge"
+          description: "Активные участники"
+          labels: ["room"]
+    
+    # SIP метрики
+    sip:
+      enabled: true
+      metrics:
+        - name: "livekit_sip_calls_total"
+          type: "counter"
+          description: "Общее количество SIP звонков"
+          labels: ["direction", "status"]
+          
+        - name: "livekit_sip_calls_active"
+          type: "gauge"
+          description: "Активные SIP звонки"
+          
+        - name: "livekit_sip_call_duration_seconds"
+          type: "histogram"
+          description: "Длительность SIP звонков"
+          buckets: [30, 60, 120, 300, 600, 1800]
+          
+        - name: "livekit_sip_trunk_status"
+          type: "gauge"
+          description: "Статус SIP транков"
+          labels: ["trunk_name", "type"]
+    
+    # Egress метрики
+    egress:
+      enabled: true
+      metrics:
+        - name: "livekit_egress_sessions_total"
+          type: "counter"
+          description: "Общее количество Egress сессий"
+          labels: ["type", "status"]
+          
+        - name: "livekit_egress_sessions_active"
+          type: "gauge"
+          description: "Активные Egress сессии"
+          labels: ["type"]
+          
+        - name: "livekit_egress_duration_seconds"
+          type: "histogram"
+          description: "Длительность Egress сессий"
+          buckets: [60, 300, 600, 1800, 3600, 7200]
+          
+        - name: "livekit_egress_file_size_bytes"
+          type: "histogram"
+          description: "Размер выходных файлов Egress"
+          buckets: [1048576, 10485760, 104857600, 1073741824, 10737418240]  # 1MB, 10MB, 100MB, 1GB, 10GB
+    
+    # Ingress метрики
+    ingress:
+      enabled: true
+      metrics:
+        - name: "livekit_ingress_sessions_total"
+          type: "counter"
+          description: "Общее количество Ingress сессий"
+          labels: ["type", "status"]
+          
+        - name: "livekit_ingress_sessions_active"
+          type: "gauge"
+          description: "Активные Ingress сессии"
+          labels: ["type"]
+          
+        - name: "livekit_ingress_bitrate_bps"
+          type: "gauge"
+          description: "Битрейт Ingress потоков"
+          labels: ["ingress_id", "track_type"]
+    
+    # Ошибки и алерты
+    errors:
+      enabled: true
+      metrics:
+        - name: "livekit_errors_total"
+          type: "counter"
+          description: "Общее количество ошибок"
+          labels: ["type", "severity", "component"]
+          
+        - name: "livekit_alerts_total"
+          type: "counter"
+          description: "Общее количество алертов"
+          labels: ["type", "severity"]
+
+# =============================================================================
+# АЛЕРТЫ КОНФИГУРАЦИЯ
+# =============================================================================
+
+alerts:
+  # Настройки алертов
+  settings:
+    enabled: true
+    evaluation_interval: 60  # секунды
+    notification_timeout: 30  # секунды
+    
+  # Правила алертов
+  rules:
+    # Критические алерты
+    critical:
+      - name: "LiveKitServerDown"
+        description: "LiveKit сервер недоступен"
+        condition: "livekit_connections_active == 0"
+        duration: "2m"
+        severity: "critical"
+        
+      - name: "HighAPIErrorRate"
+        description: "Высокий уровень ошибок API"
+        condition: "rate(livekit_errors_total[5m]) > 0.1"
+        duration: "5m"
+        severity: "critical"
+        
+      - name: "DatabaseConnectionLost"
+        description: "Потеряно подключение к базе данных"
+        condition: "database_connection_status == 0"
+        duration: "1m"
+        severity: "critical"
+    
+    # Предупреждения
+    warning:
+      - name: "HighAPILatency"
+        description: "Высокая латентность API"
+        condition: "livekit_api_request_duration_seconds > 2.0"
+        duration: "5m"
+        severity: "warning"
+        
+      - name: "HighMemoryUsage"
+        description: "Высокое использование памяти"
+        condition: "memory_usage_percent > 80"
+        duration: "10m"
+        severity: "warning"
+        
+      - name: "TooManyActiveRooms"
+        description: "Слишком много активных комнат"
+        condition: "livekit_rooms_active > 50"
+        duration: "5m"
+        severity: "warning"
+    
+    # Информационные алерты
+    info:
+      - name: "NewRoomCreated"
+        description: "Создана новая комната"
+        condition: "increase(livekit_rooms_total[1m]) > 0"
+        duration: "0s"
+        severity: "info"
+        
+      - name: "SIPCallStarted"
+        description: "Начат SIP звонок"
+        condition: "increase(livekit_sip_calls_total[1m]) > 0"
+        duration: "0s"
+        severity: "info"
+
+# =============================================================================
+# ЛОГИРОВАНИЕ КОНФИГУРАЦИЯ
+# =============================================================================
+
+logging:
+  # Основные настройки логирования
+  settings:
+    level: "${LIVEKIT_LOG_LEVEL:-INFO}"
+    format: "json"
+    structured: true
+    timestamp_format: "iso8601"
+    
+  # Категории логов
+  categories:
+    # Системные логи
+    system:
+      enabled: true
+      level: "INFO"
+      include_stack_trace: false
+      
+    # API логи
+    api:
+      enabled: true
+      level: "INFO"
+      log_requests: true
+      log_responses: false  # Может содержать чувствительные данные
+      log_headers: false    # Может содержать токены
+      
+    # Ошибки
+    errors:
+      enabled: true
+      level: "ERROR"
+      include_stack_trace: true
+      include_context: true
+      
+    # Безопасность
+    security:
+      enabled: true
+      level: "WARNING"
+      log_auth_attempts: true
+      log_token_creation: false  # Не логировать токены
+      
+    # Производительность
+    performance:
+      enabled: true
+      level: "DEBUG"
+      log_slow_queries: true
+      slow_query_threshold: 1000  # мс
+      
+  # Фильтры логов
+  filters:
+    # Исключить чувствительные данные
+    exclude_patterns:
+      - "api_secret"
+      - "password"
+      - "token"
+      - "authorization"
+      - "secret"
+      
+    # Включить только определенные компоненты
+    include_components:
+      - "livekit_api"
+      - "sip_service"
+      - "room_service"
+      - "monitoring"
+
+# =============================================================================
+# DASHBOARD КОНФИГУРАЦИЯ
+# =============================================================================
+
+dashboard:
+  # Настройки дашборда
+  settings:
+    enabled: true
+    refresh_interval: 30  # секунды
+    auto_refresh: true
+    
+  # Панели дашборда
+  panels:
+    # Обзор системы
+    system_overview:
+      enabled: true
+      position: 1
+      metrics:
+        - "livekit_connections_active"
+        - "livekit_rooms_active"
+        - "livekit_participants_active"
+        - "livekit_api_requests_total"
+        
+    # Производительность
+    performance:
+      enabled: true
+      position: 2
+      metrics:
+        - "livekit_api_request_duration_seconds"
+        - "memory_usage_percent"
+        - "cpu_usage_percent"
+        - "livekit_errors_total"
+        
+    # SIP статистика
+    sip_stats:
+      enabled: true
+      position: 3
+      metrics:
+        - "livekit_sip_calls_active"
+        - "livekit_sip_calls_total"
+        - "livekit_sip_call_duration_seconds"
+        - "livekit_sip_trunk_status"
+        
+    # Egress/Ingress
+    media_processing:
+      enabled: true
+      position: 4
+      metrics:
+        - "livekit_egress_sessions_active"
+        - "livekit_ingress_sessions_active"
+        - "livekit_egress_file_size_bytes"
+        - "livekit_ingress_bitrate_bps"
+
+# =============================================================================
+# ИНТЕГРАЦИИ
+# =============================================================================
+
+integrations:
+  # Prometheus интеграция
+  prometheus:
+    enabled: true
+    scrape_interval: 30
+    scrape_timeout: 10
+    metrics_path: "/metrics"
+    
+  # Grafana интеграция
+  grafana:
+    enabled: false
+    dashboard_url: "${GRAFANA_DASHBOARD_URL}"
+    api_key: "${GRAFANA_API_KEY}"
+    
+  # Webhook уведомления
+  webhooks:
+    enabled: true
+    endpoints:
+      - name: "slack"
+        url: "${SLACK_WEBHOOK_URL}"
+        events: ["critical", "warning"]
+        timeout: 10
+        
+      - name: "discord"
+        url: "${DISCORD_WEBHOOK_URL}"
+        events: ["critical"]
+        timeout: 10
+        
+  # Email уведомления
+  email:
+    enabled: false
+    smtp_server: "${SMTP_SERVER}"
+    smtp_port: 587
+    username: "${SMTP_USERNAME}"
+    password: "${SMTP_PASSWORD}"
+    from_address: "${ALERT_FROM_EMAIL}"
+    to_addresses: ["${ALERT_TO_EMAIL}"]

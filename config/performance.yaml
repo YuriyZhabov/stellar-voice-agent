@@ -1,0 +1,152 @@
+# LiveKit Performance Optimization Configuration
+# Конфигурация оптимизации производительности системы LiveKit
+
+# Connection Pool Settings
+connection_pool:
+  # Размер пула соединений
+  pool_size: 5
+  # Максимальный размер пула при динамическом расширении
+  max_pool_size: 10
+  # Интервал health check (секунды)
+  health_check_interval: 30
+  # Таймаут для соединений (секунды)
+  connection_timeout: 10
+  # Максимальное количество попыток переподключения
+  max_reconnect_attempts: 5
+  # Базовая задержка для экспоненциального backoff (секунды)
+  reconnect_base_delay: 1.0
+
+# Room Limits
+room_limits:
+  # Максимальное количество одновременных комнат
+  max_concurrent_rooms: 10
+  # Максимальное количество участников в комнате
+  max_participants_per_room: 50
+  # Максимальное количество аудио треков в комнате
+  max_audio_tracks_per_room: 20
+  # Максимальное количество видео треков в комнате
+  max_video_tracks_per_room: 10
+  # Время жизни пустой комнаты (секунды)
+  empty_room_timeout: 300
+  # Время ожидания после ухода участника (секунды)
+  departure_timeout: 20
+
+# Audio Optimization
+audio_optimization:
+  # Целевая латентность аудио (миллисекунды)
+  target_latency_ms: 50
+  # Размер буфера (миллисекунды)
+  buffer_size_ms: 20
+  # Размер jitter буфера (миллисекунды)
+  jitter_buffer_ms: 100
+  # Подавление эха
+  echo_cancellation: true
+  # Подавление шума
+  noise_suppression: true
+  # Автоматическая регулировка усиления
+  auto_gain_control: true
+  # Адаптивный битрейт
+  adaptive_bitrate: true
+  # Минимальный битрейт (kbps)
+  min_bitrate_kbps: 16
+  # Максимальный битрейт (kbps)
+  max_bitrate_kbps: 128
+
+# Connection Quality Monitoring
+quality_monitoring:
+  # Интервал мониторинга качества (секунды)
+  monitoring_interval: 10
+  # Пороговые значения для качества соединения
+  quality_thresholds:
+    # Отличное качество (> 0.9)
+    excellent: 0.9
+    # Хорошее качество (> 0.7)
+    good: 0.7
+    # Удовлетворительное качество (> 0.5)
+    fair: 0.5
+    # Плохое качество (< 0.5)
+    poor: 0.5
+  
+  # Пороговые значения латентности (миллисекунды)
+  latency_thresholds:
+    excellent: 50
+    good: 100
+    fair: 200
+    poor: 500
+  
+  # Минимальный процент успешных запросов
+  min_success_rate: 0.95
+
+# Performance Metrics
+metrics:
+  # Включить сбор детальных метрик
+  detailed_metrics: true
+  # Размер буфера для хранения метрик
+  metrics_buffer_size: 1000
+  # Интервал агрегации метрик (секунды)
+  aggregation_interval: 60
+  # Экспорт метрик в Prometheus
+  prometheus_export: true
+  # Порт для Prometheus метрик
+  prometheus_port: 9090
+
+# Graceful Reconnection
+reconnection:
+  # Включить graceful reconnection
+  enabled: true
+  # Максимальное количество попыток
+  max_attempts: 5
+  # Экспоненциальный backoff
+  exponential_backoff: true
+  # Максимальная задержка между попытками (секунды)
+  max_delay: 60
+  # Jitter для предотвращения thundering herd
+  jitter: true
+  # Процент jitter (0.0 - 1.0)
+  jitter_percent: 0.1
+
+# Resource Management
+resource_management:
+  # Автоматическая очистка неактивных ресурсов
+  auto_cleanup: true
+  # Интервал очистки (секунды)
+  cleanup_interval: 300
+  # Максимальное время жизни неактивной комнаты (секунды)
+  inactive_room_ttl: 3600
+  # Максимальное время жизни отключенного участника (секунды)
+  disconnected_participant_ttl: 120
+
+# Load Balancing
+load_balancing:
+  # Включить балансировку нагрузки
+  enabled: true
+  # Алгоритм балансировки (round_robin, least_connections, weighted)
+  algorithm: "least_connections"
+  # Веса для weighted алгоритма
+  weights:
+    primary: 1.0
+    secondary: 0.8
+  # Проверка здоровья узлов
+  health_check_enabled: true
+
+# Caching
+caching:
+  # Включить кэширование
+  enabled: true
+  # TTL для кэша комнат (секунды)
+  room_cache_ttl: 300
+  # TTL для кэша участников (секунды)
+  participant_cache_ttl: 60
+  # Максимальный размер кэша
+  max_cache_size: 1000
+
+# Logging
+logging:
+  # Уровень логирования для производительности
+  level: "INFO"
+  # Включить структурированное логирование
+  structured: true
+  # Включить метрики в логи
+  include_metrics: true
+  # Интервал логирования метрик (секунды)
+  metrics_log_interval: 60

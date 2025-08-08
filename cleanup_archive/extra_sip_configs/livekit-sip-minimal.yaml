@@ -1,0 +1,30 @@
+# МИНИМАЛЬНАЯ КОНФИГУРАЦИЯ - ПРИНИМАЕМ ВСЕ ЗВОНКИ
+# Убираем все лишнее, оставляем только необходимое
+
+livekit:
+  url: wss://voice-mz90cpgw.livekit.cloud
+  api_key: API48Ajeeuv4tYL
+  api_secret: Q5eag53mO3WVhUcoRGmI5Y1wjDbCFnf7qn6pJOzakHN
+
+redis:
+  address: voice-ai-redis-simple:6379
+
+# Простейший SIP trunk - принимаем все
+sip_trunks:
+- name: accept-all
+  inbound: true
+  outbound: false
+
+# Простейшая маршрутизация - принимаем ВСЕ звонки
+routing:
+  inbound_rules:
+  - name: accept-everything
+    match: {}  # Пустой match = принимаем все
+    action:
+      type: livekit_room
+      room_name_template: "call-{call_id}"
+      participant_name: "caller"
+      participant_identity: "{caller_number}"
+
+logging:
+  level: DEBUG

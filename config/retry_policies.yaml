@@ -1,0 +1,411 @@
+# Retry Policies Configuration
+# Конфигурация политик повторных попыток для различных операций LiveKit
+
+# =============================================================================
+# ОБЩИЕ НАСТРОЙКИ RETRY
+# =============================================================================
+
+default_retry:
+  # Базовые настройки для всех операций
+  max_attempts: 3
+  initial_delay: 1.0  # секунды
+  max_delay: 60.0     # секунды
+  backoff_multiplier: 2.0
+  jitter: true        # Добавлять случайную задержку
+  exponential_backoff: true
+
+# =============================================================================
+# RETRY ПОЛИТИКИ ДЛЯ LIVEKIT API
+# =============================================================================
+
+livekit_api:
+  # Операции с комнатами
+  room_operations:
+    create_room:
+      max_attempts: 5
+      initial_delay: 0.5
+      max_delay: 30.0
+      backoff_multiplier: 1.5
+      # Повторять при временных ошибках сервера
+      retry_on_status_codes: [500, 502, 503, 504, 429]
+      
+    delete_room:
+      max_attempts: 3
+      initial_delay: 1.0
+      max_delay: 15.0
+      backoff_multiplier: 2.0
+      retry_on_status_codes: [500, 502, 503, 504]
+      
+    list_rooms:
+      max_attempts: 3
+      initial_delay: 0.5
+      max_delay: 10.0
+      backoff_multiplier: 1.5
+      retry_on_status_codes: [500, 502, 503, 504, 429]
+  
+  # Операции с участниками
+  participant_operations:
+    list_participants:
+      max_attempts: 3
+      initial_delay: 0.5
+      max_delay: 10.0
+      backoff_multiplier: 1.5
+      retry_on_status_codes: [500, 502, 503, 504, 429]
+      
+    remove_participant:
+      max_attempts: 3
+      initial_delay: 1.0
+      max_delay: 15.0
+      backoff_multiplier: 2.0
+      retry_on_status_codes: [500, 502, 503, 504]
+      
+    update_participant:
+      max_attempts: 3
+      initial_delay: 1.0
+      max_delay: 15.0
+      backoff_multiplier: 2.0
+      retry_on_status_codes: [500, 502, 503, 504]
+  
+  # Операции с треками
+  track_operations:
+    mute_track:
+      max_attempts: 3
+      initial_delay: 0.5
+      max_delay: 10.0
+      backoff_multiplier: 1.5
+      retry_on_status_codes: [500, 502, 503, 504]
+      
+    update_subscriptions:
+      max_attempts: 3
+      initial_delay: 0.5
+      max_delay: 10.0
+      backoff_multiplier: 1.5
+      retry_on_status_codes: [500, 502, 503, 504]
+
+# =============================================================================
+# RETRY ПОЛИТИКИ ДЛЯ SIP ОПЕРАЦИЙ
+# =============================================================================
+
+sip_operations:
+  # Создание SIP транков
+  trunk_operations:
+    create_inbound_trunk:
+      max_attempts: 3
+      initial_delay: 2.0
+      max_delay: 30.0
+      backoff_multiplier: 2.0
+      retry_on_status_codes: [500, 502, 503, 504]
+      
+    create_outbound_trunk:
+      max_attempts: 3
+      initial_delay: 2.0
+      max_delay: 30.0
+      backoff_multiplier: 2.0
+      retry_on_status_codes: [500, 502, 503, 504]
+      
+    delete_trunk:
+      max_attempts: 3
+      initial_delay: 1.0
+      max_delay: 15.0
+      backoff_multiplier: 2.0
+      retry_on_status_codes: [500, 502, 503, 504]
+  
+  # Правила маршрутизации
+  dispatch_rules:
+    create_dispatch_rule:
+      max_attempts: 3
+      initial_delay: 1.0
+      max_delay: 20.0
+      backoff_multiplier: 2.0
+      retry_on_status_codes: [500, 502, 503, 504]
+      
+    delete_dispatch_rule:
+      max_attempts: 3
+      initial_delay: 1.0
+      max_delay: 15.0
+      backoff_multiplier: 2.0
+      retry_on_status_codes: [500, 502, 503, 504]
+  
+  # SIP участники
+  participant_operations:
+    create_sip_participant:
+      max_attempts: 5
+      initial_delay: 1.0
+      max_delay: 30.0
+      backoff_multiplier: 2.0
+      retry_on_status_codes: [500, 502, 503, 504, 429]
+
+# =============================================================================
+# RETRY ПОЛИТИКИ ДЛЯ EGRESS ОПЕРАЦИЙ
+# =============================================================================
+
+egress_operations:
+  # Композитная запись комнаты
+  room_composite:
+    start_recording:
+      max_attempts: 3
+      initial_delay: 2.0
+      max_delay: 30.0
+      backoff_multiplier: 2.0
+      retry_on_status_codes: [500, 502, 503, 504]
+      
+    stop_recording:
+      max_attempts: 3
+      initial_delay: 1.0
+      max_delay: 15.0
+      backoff_multiplier: 2.0
+      retry_on_status_codes: [500, 502, 503, 504]
+  
+  # Композитная запись треков
+  track_composite:
+    start_track_recording:
+      max_attempts: 3
+      initial_delay: 2.0
+      max_delay: 30.0
+      backoff_multiplier: 2.0
+      retry_on_status_codes: [500, 502, 503, 504]
+      
+    stop_track_recording:
+      max_attempts: 3
+      initial_delay: 1.0
+      max_delay: 15.0
+      backoff_multiplier: 2.0
+      retry_on_status_codes: [500, 502, 503, 504]
+  
+  # Управление Egress
+  management:
+    list_egress:
+      max_attempts: 3
+      initial_delay: 0.5
+      max_delay: 10.0
+      backoff_multiplier: 1.5
+      retry_on_status_codes: [500, 502, 503, 504, 429]
+      
+    update_layout:
+      max_attempts: 3
+      initial_delay: 1.0
+      max_delay: 15.0
+      backoff_multiplier: 2.0
+      retry_on_status_codes: [500, 502, 503, 504]
+
+# =============================================================================
+# RETRY ПОЛИТИКИ ДЛЯ INGRESS ОПЕРАЦИЙ
+# =============================================================================
+
+ingress_operations:
+  # Создание Ingress
+  creation:
+    create_rtmp_ingress:
+      max_attempts: 3
+      initial_delay: 2.0
+      max_delay: 30.0
+      backoff_multiplier: 2.0
+      retry_on_status_codes: [500, 502, 503, 504]
+      
+    create_whip_ingress:
+      max_attempts: 3
+      initial_delay: 2.0
+      max_delay: 30.0
+      backoff_multiplier: 2.0
+      retry_on_status_codes: [500, 502, 503, 504]
+      
+    create_url_ingress:
+      max_attempts: 3
+      initial_delay: 2.0
+      max_delay: 30.0
+      backoff_multiplier: 2.0
+      retry_on_status_codes: [500, 502, 503, 504]
+  
+  # Управление Ingress
+  management:
+    list_ingress:
+      max_attempts: 3
+      initial_delay: 0.5
+      max_delay: 10.0
+      backoff_multiplier: 1.5
+      retry_on_status_codes: [500, 502, 503, 504, 429]
+      
+    delete_ingress:
+      max_attempts: 3
+      initial_delay: 1.0
+      max_delay: 15.0
+      backoff_multiplier: 2.0
+      retry_on_status_codes: [500, 502, 503, 504]
+      
+    update_ingress:
+      max_attempts: 3
+      initial_delay: 1.0
+      max_delay: 15.0
+      backoff_multiplier: 2.0
+      retry_on_status_codes: [500, 502, 503, 504]
+
+# =============================================================================
+# RETRY ПОЛИТИКИ ДЛЯ WEBHOOK ОПЕРАЦИЙ
+# =============================================================================
+
+webhook_operations:
+  # Отправка webhooks
+  delivery:
+    send_webhook:
+      max_attempts: 3
+      initial_delay: 1.0
+      max_delay: 60.0
+      backoff_multiplier: 2.0
+      # Повторять при сетевых ошибках и временных проблемах
+      retry_on_status_codes: [500, 502, 503, 504, 408, 429]
+      retry_on_exceptions: 
+        - "ConnectionError"
+        - "TimeoutError"
+        - "HTTPError"
+  
+  # Обработка webhook событий
+  processing:
+    process_room_event:
+      max_attempts: 2
+      initial_delay: 0.5
+      max_delay: 5.0
+      backoff_multiplier: 2.0
+      
+    process_participant_event:
+      max_attempts: 2
+      initial_delay: 0.5
+      max_delay: 5.0
+      backoff_multiplier: 2.0
+      
+    process_track_event:
+      max_attempts: 2
+      initial_delay: 0.5
+      max_delay: 5.0
+      backoff_multiplier: 2.0
+
+# =============================================================================
+# RETRY ПОЛИТИКИ ДЛЯ ПОДКЛЮЧЕНИЙ
+# =============================================================================
+
+connection_operations:
+  # WebSocket подключения
+  websocket:
+    connect:
+      max_attempts: 5
+      initial_delay: 1.0
+      max_delay: 30.0
+      backoff_multiplier: 2.0
+      jitter: true
+      
+    reconnect:
+      max_attempts: 10
+      initial_delay: 1.0
+      max_delay: 60.0
+      backoff_multiplier: 1.5
+      jitter: true
+  
+  # HTTP подключения
+  http:
+    request:
+      max_attempts: 3
+      initial_delay: 0.5
+      max_delay: 15.0
+      backoff_multiplier: 2.0
+      retry_on_status_codes: [500, 502, 503, 504, 429, 408]
+      
+    upload:
+      max_attempts: 3
+      initial_delay: 2.0
+      max_delay: 60.0
+      backoff_multiplier: 2.0
+      retry_on_status_codes: [500, 502, 503, 504, 429, 408]
+
+# =============================================================================
+# RETRY ПОЛИТИКИ ДЛЯ АУТЕНТИФИКАЦИИ
+# =============================================================================
+
+authentication:
+  # JWT токены
+  jwt_operations:
+    create_token:
+      max_attempts: 3
+      initial_delay: 0.5
+      max_delay: 10.0
+      backoff_multiplier: 2.0
+      
+    refresh_token:
+      max_attempts: 5
+      initial_delay: 1.0
+      max_delay: 30.0
+      backoff_multiplier: 1.5
+      # Критично для поддержания сессии
+      
+    validate_token:
+      max_attempts: 2
+      initial_delay: 0.5
+      max_delay: 5.0
+      backoff_multiplier: 2.0
+
+# =============================================================================
+# СПЕЦИАЛЬНЫЕ RETRY ПОЛИТИКИ
+# =============================================================================
+
+special_cases:
+  # Критические операции (требуют особого внимания)
+  critical_operations:
+    emergency_disconnect:
+      max_attempts: 1  # Не повторять
+      initial_delay: 0
+      
+    security_violation:
+      max_attempts: 1  # Не повторять
+      initial_delay: 0
+  
+  # Операции с высокой латентностью
+  high_latency_operations:
+    file_upload:
+      max_attempts: 3
+      initial_delay: 5.0
+      max_delay: 120.0
+      backoff_multiplier: 2.0
+      
+    large_data_transfer:
+      max_attempts: 3
+      initial_delay: 10.0
+      max_delay: 300.0
+      backoff_multiplier: 1.5
+  
+  # Операции в условиях высокой нагрузки
+  high_load_operations:
+    bulk_operations:
+      max_attempts: 5
+      initial_delay: 2.0
+      max_delay: 60.0
+      backoff_multiplier: 1.5
+      jitter: true
+      
+    rate_limited_operations:
+      max_attempts: 10
+      initial_delay: 1.0
+      max_delay: 120.0
+      backoff_multiplier: 1.2
+      jitter: true
+
+# =============================================================================
+# НАСТРОЙКИ CIRCUIT BREAKER
+# =============================================================================
+
+circuit_breaker:
+  # Настройки для предотвращения каскадных сбоев
+  default:
+    failure_threshold: 5      # Количество сбоев для открытия
+    recovery_timeout: 60      # Время до попытки восстановления (секунды)
+    expected_exception_types:
+      - "ConnectionError"
+      - "TimeoutError"
+      - "HTTPError"
+  
+  # Специфичные настройки для LiveKit API
+  livekit_api:
+    failure_threshold: 3
+    recovery_timeout: 30
+    
+  # Специфичные настройки для SIP операций
+  sip_operations:
+    failure_threshold: 5
+    recovery_timeout: 120

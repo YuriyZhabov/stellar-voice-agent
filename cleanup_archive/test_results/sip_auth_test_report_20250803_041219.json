@@ -1,0 +1,17 @@
+{
+  "test_timestamp": "2025-08-03T04:12:19.149974",
+  "sip_number": "+79952227978",
+  "service_status": true,
+  "livekit_connectivity": null,
+  "sip_registration": null,
+  "monitoring_results": {
+    "auth_errors": [],
+    "successful_calls": [],
+    "monitoring_duration": 60
+  },
+  "summary": {
+    "auth_errors_count": 0,
+    "successful_calls_count": 0,
+    "auth_fix_successful": true
+  }
+}

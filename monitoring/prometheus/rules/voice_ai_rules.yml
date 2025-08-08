@@ -1,0 +1,46 @@
+groups:
+  - name: voice_ai_agent_rules
+    rules:
+      # Service availability rules
+      - record: voice_ai:service_up
+        expr: up{job="voice-ai-agent"}
+        labels:
+          service: "voice-ai-agent"
+
+      - record: voice_ai:prometheus_up
+        expr: up{job="prometheus"}
+        labels:
+          service: "prometheus"
+
+      - record: voice_ai:redis_up
+        expr: up{job="redis"}
+        labels:
+          service: "redis"
+
+      # Performance rules
+      - record: voice_ai:request_rate_5m
+        expr: rate(http_requests_total{job="voice-ai-agent"}[5m])
+        labels:
+          service: "voice-ai-agent"
+
+      - record: voice_ai:error_rate_5m
+        expr: rate(http_requests_total{job="voice-ai-agent",status=~"5.."}[5m])
+        labels:
+          service: "voice-ai-agent"
+
+      - record: voice_ai:response_time_95p
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="voice-ai-agent"}[5m]))
+        labels:
+          service: "voice-ai-agent"
+
+  - name: system_health_rules
+    rules:
+      # System health aggregations
+      - record: system:services_up_count
+        expr: count(up == 1)
+
+      - record: system:services_down_count
+        expr: count(up == 0)
+
+      - record: system:overall_health
+        expr: system:services_up_count / (system:services_up_count + system:services_down_count)

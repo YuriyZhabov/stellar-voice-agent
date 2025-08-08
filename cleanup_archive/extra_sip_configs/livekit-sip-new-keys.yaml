@@ -1,0 +1,53 @@
+# КОНФИГУРАЦИЯ С НОВЫМИ КЛЮЧАМИ LIVEKIT
+
+livekit:
+  url: wss://voice-mz90cpgw.livekit.cloud
+  api_key: APIJrnqBwqxL2N6
+  api_secret: vd2Kjxdilq1lDpJw8lG6NjHpXDyRUjaywJEzt4akZ0P
+  timeout: 30s
+  retry_attempts: 5
+  connection:
+    timeout: 30000
+    keep_alive: 25000
+    reconnect: true
+    max_reconnect_attempts: 10
+    reconnect_delay: 1000
+
+redis:
+  address: voice-ai-redis-simple:6379
+
+# SIP trunk для входящих звонков
+sip_trunks:
+- name: novofon-trunk
+  inbound: true
+  outbound: false
+  register: false
+
+# Маршрутизация входящих звонков
+routing:
+  inbound_rules:
+  - name: accept-inbound-calls
+    match:
+      to: "79952227978"
+    action:
+      type: livekit_room
+      room_name_template: "voice-call-{call_id}"
+      participant_name: "caller"
+      participant_identity: "{caller_number}"
+      metadata:
+        webhook_url: "http://agentio.ru:8000/webhooks/livekit"
+
+# Webhook настройки
+webhooks:
+  enabled: true
+  url: http://agentio.ru:8000/webhooks/livekit
+  secret: voice-ai-agent-secret-key-change-in-production
+  timeout: 15000
+  events:
+  - room_started
+  - room_finished
+  - participant_joined
+  - participant_left
+
+logging:
+  level: DEBUG

@@ -1,0 +1,297 @@
+# Правильная конфигурация SIP согласно спецификации LiveKit SIP API
+# Основано на исчерпывающем справочнике API LiveKit
+
+# Основные настройки подключения к LiveKit
+livekit:
+  url: "${LIVEKIT_URL}"
+  api_key: "${LIVEKIT_API_KEY}"
+  api_secret: "${LIVEKIT_API_SECRET}"
+  
+  # Настройки подключения согласно спецификации
+  connection_timeout: 30s
+  keep_alive: 25s
+  auto_reconnect: true
+  max_reconnect_attempts: 10
+  reconnect_delay: 1s
+  
+  # Настройки WebSocket соединения
+  ws_url: "${LIVEKIT_WS_URL}"
+  use_tls: true
+
+# Настройки Redis для состояния SIP
+redis:
+  address: ${REDIS_URL:-redis://localhost:6379}
+  timeout: 5s
+  max_retries: 3
+  retry_delay: 1s
+
+# SIP транки согласно SIP API спецификации
+sip_trunks:
+  # Входящий транк для приема звонков (CreateSIPInboundTrunk)
+  - name: "novofon-inbound"
+    inbound_only: true
+    
+    # Настройки согласно CreateSIPInboundTrunk API
+    numbers:
+      - "${SIP_NUMBER}"
+      - "+${SIP_NUMBER}"
+      - "7${SIP_NUMBER}"  # Российский формат
+    
+    # Разрешенные IP-адреса провайдера
+    allowed_addresses:
+      - "0.0.0.0/0"  # Разрешить все IP (настроить по требованиям безопасности)
+    
+    # Аутентификация для входящих звонков
+    auth_required: false  # Обычно не требуется для входящих от провайдера
+    
+    # Дополнительные настройки безопасности
+    headers_to_log:
+      - "From"
+      - "To" 
+      - "Call-ID"
+      - "User-Agent"
+    
+  # Исходящий транк для совершения звонков (CreateSIPOutboundTrunk)
+  - name: "novofon-outbound"
+    outbound_only: true
+    
+    # Настройки подключения к провайдеру
+    host: "${SIP_SERVER}"
+    port: 5060
+    transport: "UDP"
+    
+    # Аутентификация согласно CreateSIPOutboundTrunk
+    auth_username: "${SIP_USERNAME}"
+    auth_password: "${SIP_PASSWORD}"
+    
+    # Дополнительные настройки исходящих звонков
+    from_user: "${SIP_USERNAME}"
+    from_domain: "${SIP_SERVER}"
+    
+    # Настройки retry для исходящих звонков
+    max_call_duration: 3600s  # 1 час максимум
+    ring_timeout: 60s
+    
+# Правила маршрутизации согласно CreateSIPDispatchRule API
+routing:
+  # Правила для входящих звонков
+  inbound_rules:
+    - name: "voice-ai-dispatch"
+      # Условия маршрутизации
+      match:
+        to: "${SIP_NUMBER}"
+        # Дополнительные условия можно добавить:
+        # from_regex: "^\\+7\\d{10}$"  # Только российские номера
+        # headers:
+        #   "User-Agent": ".*Novofon.*"
+      
+      # Действие - создание LiveKit комнаты
+      action:
+        type: livekit_room
+        
+        # Шаблон имени комнаты с уникальным идентификатором
+        room_name_template: "voice-ai-call-{call_id}"
+        
+        # Настройки участника
+        participant_name: "caller"
+        participant_identity: "{caller_number}"
+        
+        # Метаданные комнаты согласно спецификации
+        room_metadata:
+          call_type: "inbound"
+          sip_number: "${SIP_NUMBER}"
+          provider: "novofon"
+          created_at: "{timestamp}"
+          caller_number: "{caller_number}"
+          called_number: "{called_number}"
+        
+        # Настройки комнаты согласно CreateRoom API
+        room_config:
+          empty_timeout: 300  # 5 минут
+          departure_timeout: 20  # 20 секунд
+          max_participants: 2  # Звонящий + AI агент
+          
+        # Права участника согласно VideoGrants
+        participant_grants:
+          can_publish: true
+          can_subscribe: true
+          can_publish_data: true
+          can_update_own_metadata: true
+          room_join: true
+
+  # Правила для исходящих звонков (если потребуется)
+  outbound_rules:
+    - name: "ai-initiated-calls"
+      match:
+        room_name_regex: "^ai-outbound-.*"
+      action:
+        type: sip_trunk
+        trunk_name: "novofon-outbound"
+        to_number: "{metadata.target_number}"
+        from_number: "${SIP_NUMBER}"
+
+# Webhook конфигурация согласно спецификации
+webhooks:
+  enabled: true
+  url: "http://${DOMAIN}:${PORT}/webhooks/livekit"
+  secret: "${SECRET_KEY}"
+  
+  # Настройки retry для webhooks
+  timeout: 5s
+  max_retries: 3
+  retry_delay: 1s
+  exponential_backoff: true
+  
+  # События для отправки webhooks
+  events:
+    - room_started
+    - room_finished
+    - participant_joined
+    - participant_left
+    - track_published
+    - track_unpublished
+    - recording_started
+    - recording_finished
+
+# Аудио кодеки согласно спецификации (в порядке приоритета)
+audio_codecs:
+  - name: "PCMU"      # G.711 μ-law
+    priority: 1
+    sample_rate: 8000
+    
+  - name: "PCMA"      # G.711 A-law  
+    priority: 2
+    sample_rate: 8000
+    
+  - name: "G722"      # G.722 wideband
+    priority: 3
+    sample_rate: 16000
+    
+  - name: "opus"      # Opus codec
+    priority: 4
+    sample_rate: 48000
+    bitrate: 32000
+
+# Настройки RTP согласно спецификации
+rtp:
+  # Диапазон портов для RTP
+  port_range:
+    min: 10000
+    max: 20000
+  
+  # Настройки DTMF
+  dtmf:
+    enabled: true
+    payload_type: 101
+    
+  # Настройки jitter buffer
+  jitter_buffer:
+    min_delay: 20ms
+    max_delay: 200ms
+    target_delay: 60ms
+
+# Логирование согласно рекомендациям
+logging:
+  level: ${LOG_LEVEL:-INFO}
+  structured: true
+  format: json
+  
+  # Что логировать
+  log_sip_messages: true
+  log_rtp_stats: false  # Может быть очень много данных
+  log_room_events: true
+  log_participant_events: true
+  
+  # Маскирование чувствительных данных
+  mask_auth_headers: true
+  mask_phone_numbers: false  # Для отладки можно включить
+
+# Health check конфигурация
+health_check:
+  enabled: true
+  interval: 60s
+  timeout: 10s
+  
+  # Проверки для выполнения
+  checks:
+    - livekit_connection
+    - redis_connection
+    - sip_trunk_registration
+    - webhook_endpoint
+
+# Настройки производительности
+performance:
+  # Максимальное количество одновременных звонков
+  max_concurrent_calls: 100
+  
+  # Настройки connection pooling
+  connection_pool:
+    max_connections: 50
+    idle_timeout: 300s
+    
+  # Настройки буферизации
+  audio_buffer_size: 160  # samples
+  
+  # Настройки качества
+  audio_quality:
+    enable_echo_cancellation: true
+    enable_noise_suppression: true
+    enable_auto_gain_control: true
+
+# Настройки безопасности
+security:
+  # Ограничения по IP
+  ip_restrictions:
+    enabled: false  # Включить при необходимости
+    allowed_ranges:
+      - "10.0.0.0/8"
+      - "172.16.0.0/12" 
+      - "192.168.0.0/16"
+  
+  # Ограничения по частоте вызовов
+  rate_limiting:
+    enabled: true
+    max_calls_per_minute: 60
+    max_calls_per_hour: 1000
+    
+  # Настройки TLS
+  tls:
+    verify_certificates: true
+    min_version: "1.2"
+
+# Мониторинг и метрики
+monitoring:
+  enabled: true
+  
+  # Метрики для сбора
+  metrics:
+    - call_duration
+    - call_quality
+    - connection_latency
+    - error_rates
+    - concurrent_calls
+    
+  # Экспорт метрик
+  prometheus:
+    enabled: true
+    port: 9090
+    path: "/metrics"
+    
+  # Алерты
+  alerts:
+    high_error_rate_threshold: 0.05  # 5%
+    high_latency_threshold: 500ms
+    max_concurrent_calls_threshold: 80  # 80% от максимума
+
+# Настройки для разработки и отладки
+debug:
+  enabled: ${DEBUG:-false}
+  
+  # Дополнительное логирование для отладки
+  verbose_logging: false
+  dump_sip_messages: false
+  dump_rtp_packets: false
+  
+  # Тестовые настройки
+  test_mode: false
+  simulate_network_issues: false

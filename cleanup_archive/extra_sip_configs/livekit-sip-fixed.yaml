@@ -1,0 +1,86 @@
+# ИСПРАВЛЕННАЯ КОНФИГУРАЦИЯ ДЛЯ ВХОДЯЩИХ ЗВОНКОВ
+# Настроена для приема звонков от Novofon без аутентификации
+
+livekit:
+  url: wss://voice-mz90cpgw.livekit.cloud
+  api_key: APIJrnqBwqxL2N6
+  api_secret: vd2Kjxdilq1lDpJw8lG6NjHpXDyRUjaywJEzt4akZ0P
+
+redis:
+  address: voice-ai-redis-simple:6379
+
+# SIP trunk для входящих звонков БЕЗ аутентификации
+sip_trunks:
+- name: novofon-inbound
+  # ВАЖНО: только входящие звонки
+  inbound: true
+  outbound: false
+  # НЕ регистрируемся на SIP сервере
+  register: false
+  # НЕ требуем аутентификацию для входящих
+  auth_required: false
+  # Разрешаем звонки с любых IP (Novofon может звонить с разных адресов)
+  allowed_ips:
+  - "0.0.0.0/0"
+  # Разрешенные номера для входящих звонков
+  allowed_numbers:
+  - "79952227978"
+  - "+79952227978"
+
+# Маршрутизация входящих звонков
+routing:
+  inbound_rules:
+  - name: voice-ai-calls
+    # Принимаем звонки на наш номер
+    match:
+      to: "79952227978"
+    action:
+      type: livekit_room
+      room_name_template: "voice-ai-call-{call_id}"
+      participant_name: "caller"
+      participant_identity: "{caller_number}"
+      # Метаданные для webhook
+      metadata:
+        call_type: "inbound"
+        service: "voice-ai-agent"
+        webhook_url: "http://agentio.ru:8000/webhooks/livekit"
+
+# Webhook настройки
+webhooks:
+  enabled: true
+  url: http://agentio.ru:8000/webhooks/livekit
+  secret: voice-ai-agent-secret-key-change-in-production
+  timeout: 10000
+  events:
+  - room_started
+  - room_finished
+  - participant_joined
+  - participant_left
+  - track_published
+  - track_unpublished
+
+# Аудио настройки
+audio:
+  # Кодеки для телефонии
+  codecs:
+  - name: PCMU
+    payload_type: 0
+    sample_rate: 8000
+    channels: 1
+  - name: PCMA  
+    payload_type: 8
+    sample_rate: 8000
+    channels: 1
+
+# Логирование
+logging:
+  level: DEBUG
+  
+# Сетевые настройки
+network:
+  # Порт для SIP сигнализации
+  sip_port: 5060
+  # Диапазон портов для RTP
+  rtp_port_range:
+    min: 10000
+    max: 10100

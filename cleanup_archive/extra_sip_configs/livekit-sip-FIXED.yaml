@@ -1,0 +1,28 @@
+livekit:
+  # ПРАВИЛЬНЫЙ URL для API (не WebSocket!)
+  url: https://voice-mz90cpgw.livekit.cloud
+  api_key: APIVjiLTSm92Vgt
+  api_secret: TRmrXbFnUbMPJQzDGsgQ6rSGxDzpzREsSShQBKgxWYO
+  
+redis:
+  address: voice-ai-redis-simple:6379
+
+sip_trunks:
+- name: novofon-inbound
+  inbound_only: true
+  auth_required: false
+
+routing:
+  inbound_rules:
+  - action:
+      type: livekit_room
+      room_name_template: "voice-ai-call-{call_id}"
+      participant_name: "caller"
+      participant_identity: "{caller_number}"
+
+webhooks:
+  enabled: true
+  url: http://agentio.ru:8000/webhooks/livekit
+
+logging:
+  level: DEBUG

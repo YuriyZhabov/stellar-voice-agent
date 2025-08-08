@@ -1,0 +1,30 @@
+alerting:
+  channels:
+  - log
+  - metrics
+  enabled: true
+  thresholds:
+    auth_failures_per_minute: 5
+    connection_failures_per_minute: 10
+    webhook_failures_per_minute: 20
+error_handling:
+  error_categories:
+    authentication:
+      alert: true
+      log_level: ERROR
+      retry: true
+    connection:
+      alert: false
+      log_level: WARNING
+      retry: true
+    sip:
+      alert: false
+      log_level: INFO
+      retry: false
+    webhook:
+      alert: false
+      log_level: WARNING
+      retry: true
+  include_stack_trace: true
+  log_level: ERROR
+  mask_sensitive_data: true

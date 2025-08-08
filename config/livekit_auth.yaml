@@ -1,0 +1,107 @@
+# LiveKit Authentication Configuration
+# This file contains authentication-specific settings for LiveKit JWT token management
+
+# Token defaults
+token_defaults:
+  # Default TTL for different token types (in minutes)
+  participant_ttl: 10
+  admin_ttl: 60
+  view_only_ttl: 10
+  camera_only_ttl: 10
+  microphone_only_ttl: 10
+  
+  # Auto-renewal settings
+  auto_renew_enabled: true
+  renewal_threshold_minutes: 2  # Renew when less than 2 minutes remaining
+  renewal_check_interval_seconds: 60  # Check every minute
+  
+  # Token cleanup settings
+  cleanup_interval_minutes: 30  # Clean up expired tokens every 30 minutes
+  max_active_tokens_per_identity: 5  # Maximum active tokens per identity
+
+# Permission presets for different roles
+role_permissions:
+  caller:
+    room_join: true
+    can_publish: true
+    can_subscribe: true
+    can_publish_data: true
+    can_update_own_metadata: true
+    can_publish_sources: ["camera", "microphone"]
+  
+  agent:
+    room_join: true
+    can_publish: true
+    can_subscribe: true
+    can_publish_data: true
+    can_update_own_metadata: true
+    can_publish_sources: ["camera", "microphone"]
+  
+  observer:
+    room_join: true
+    can_publish: false
+    can_subscribe: true
+    can_publish_data: false
+    can_update_own_metadata: false
+    can_publish_sources: []
+  
+  moderator:
+    room_join: true
+    room_admin: true
+    can_publish: true
+    can_subscribe: true
+    can_publish_data: true
+    can_update_own_metadata: true
+    can_publish_sources: ["camera", "microphone"]
+
+# Security settings
+security:
+  # JWT algorithm (should always be HS256 for LiveKit)
+  jwt_algorithm: "HS256"
+  
+  # Required JWT claims validation
+  required_claims:
+    - "iss"  # Issuer (API key)
+    - "sub"  # Subject (participant identity)
+    - "iat"  # Issued at
+    - "exp"  # Expires at
+    - "video"  # Video grants
+  
+  # Token validation settings
+  validate_issuer: true
+  validate_expiration: true
+  validate_issued_at: true
+  
+  # Clock skew tolerance (in seconds)
+  clock_skew_tolerance: 30
+
+# Monitoring and logging
+monitoring:
+  # Enable token metrics collection
+  enable_metrics: true
+  
+  # Log token creation/renewal events
+  log_token_events: true
+  
+  # Log level for authentication events
+  log_level: "INFO"
+  
+  # Metrics to collect
+  metrics:
+    - "tokens_created_total"
+    - "tokens_renewed_total"
+    - "tokens_expired_total"
+    - "tokens_revoked_total"
+    - "active_tokens_count"
+    - "token_validation_errors_total"
+
+# Error handling
+error_handling:
+  # Retry settings for token operations
+  max_retries: 3
+  retry_delay_seconds: 1
+  retry_backoff_multiplier: 2.0
+  
+  # Fallback behavior
+  fallback_to_default_permissions: false
+  strict_validation: true

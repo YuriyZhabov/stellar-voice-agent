@@ -1,0 +1,87 @@
+# Prometheus Health Check Configuration
+
+prometheus:
+  # Prometheus service URL
+  url: "http://localhost:9091"
+  
+  # Configuration file path
+  config_path: "monitoring/prometheus/prometheus.yml"
+  
+  # Health check settings
+  health_check:
+    timeout: 10  # seconds
+    retry_attempts: 3
+    retry_delay: 2  # seconds
+    
+  # Diagnostic settings
+  diagnostics:
+    log_analysis_lines: 100
+    save_reports: true
+    report_directory: "logs/prometheus_diagnostics"
+    
+  # Expected endpoints for health checking
+  endpoints:
+    - name: "health"
+      path: "/-/healthy"
+      expected_status: 200
+      
+    - name: "ready"
+      path: "/-/ready"
+      expected_status: 200
+      
+    - name: "config"
+      path: "/api/v1/status/config"
+      expected_status: 200
+      
+    - name: "targets"
+      path: "/api/v1/targets"
+      expected_status: 200
+      
+    - name: "metrics"
+      path: "/metrics"
+      expected_status: 200
+
+# Scrape target validation
+targets:
+  # Expected targets that should be accessible
+  expected:
+    - "voice-ai-agent:8000"
+    - "voice-ai-agent:8001"
+    - "localhost:9090"
+    
+  # Timeout for target accessibility checks
+  check_timeout: 5
+  
+  # Skip targets that are optional
+  optional:
+    - "node-exporter:9100"
+    - "cadvisor:8080"
+    - "livekit:7880"
+
+# Logging configuration
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "logs/prometheus_health.log"
+  max_size_mb: 10
+  backup_count: 5
+
+# Recovery actions configuration
+recovery:
+  # Automatic recovery attempts
+  auto_recovery: true
+  max_attempts: 3
+  
+  # Recovery actions in order of preference
+  actions:
+    - name: "restart_container"
+      command: "docker-compose restart prometheus"
+      description: "Restart Prometheus container"
+      
+    - name: "reload_config"
+      command: "docker exec voice-ai-prometheus kill -HUP 1"
+      description: "Reload Prometheus configuration"
+      
+    - name: "recreate_container"
+      command: "docker-compose up -d --force-recreate prometheus"
+      description: "Recreate Prometheus container"

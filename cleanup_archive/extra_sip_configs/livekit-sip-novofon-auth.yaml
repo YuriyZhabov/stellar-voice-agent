@@ -1,0 +1,45 @@
+livekit:
+  url: wss://voice-mz90cpgw.livekit.cloud
+  api_key: APIJrnqBwqxL2N6
+  api_secret: vd2Kjxdilq1lDpJw8lG6NjHpXDyRUjaywJEzt4akZ0P
+
+redis:
+  address: voice-ai-redis-simple:6379
+
+# SIP trunk с аутентификацией Novofon
+sip_trunks:
+- name: novofon
+  # Настройки подключения к Novofon
+  host: sip.novofon.ru
+  port: 5060
+  transport: udp
+  # Аутентификация
+  username: "0053248"
+  password: "s8zrerUKYC"
+  # Регистрация НЕ нужна для входящих
+  register: false
+  # Только входящие звонки
+  inbound: true
+  outbound: false
+
+# Маршрутизация входящих звонков
+routing:
+  inbound_rules:
+  - name: novofon-inbound
+    match:
+      trunk: novofon
+      to: "79952227978"
+    action:
+      type: livekit_room
+      room_name_template: "voice-ai-call-{call_id}"
+      participant_name: "caller"
+      participant_identity: "{caller_number}"
+
+# Webhook
+webhooks:
+  enabled: true
+  url: http://agentio.ru:8000/webhooks/livekit
+  secret: voice-ai-agent-secret-key-change-in-production
+
+logging:
+  level: DEBUG

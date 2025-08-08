@@ -1,0 +1,22 @@
+livekit:
+  url: wss://voice-mz90cpgw.livekit.cloud
+  api_key: APIJrnqBwqxL2N6
+  api_secret: vd2Kjxdilq1lDpJw8lG6NjHpXDyRUjaywJEzt4akZ0P
+
+redis:
+  address: voice-ai-redis-simple:6379
+
+routing:
+  inbound_rules:
+  - action:
+      type: livekit_room
+      room_name_template: "call-{call_id}"
+      participant_name: "caller"
+      participant_identity: "{caller_number}"
+
+webhooks:
+  enabled: true
+  url: http://agentio.ru:8000/webhooks/livekit
+
+logging:
+  level: DEBUG

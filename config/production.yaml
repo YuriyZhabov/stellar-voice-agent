@@ -1,0 +1,247 @@
+# Production Configuration for Voice AI Agent
+# Optimized for minimal response delays and maximum performance
+
+# Performance Optimization Settings
+performance:
+  # Target latency in seconds (sub-1.5s requirement)
+  target_latency: 1.2
+  max_response_latency: 1.5
+  
+  # Concurrency settings optimized for production load
+  max_concurrent_calls: 100
+  max_concurrent_processing: 50
+  
+  # Audio processing optimization
+  audio_buffer_size: 4096  # Larger buffer for better throughput
+  audio_sample_rate: 16000  # Optimized for telephony
+  audio_channels: 1  # Mono for efficiency
+  audio_bit_depth: 16
+  audio_buffer_ms: 50  # Reduced for lower latency
+  
+  # Voice Activity Detection
+  vad_threshold: 0.6  # Slightly higher for better accuracy
+  vad_frame_duration_ms: 20  # Shorter frames for responsiveness
+  
+  # Connection and timeout optimization
+  response_timeout: 8.0  # Reduced from default
+  connection_timeout: 5.0
+  read_timeout: 10.0
+  
+  # Retry and circuit breaker settings
+  retry_attempts: 2  # Reduced for faster failure detection
+  retry_backoff_multiplier: 1.5  # Faster backoff
+  max_retry_delay: 30.0  # Reduced max delay
+  circuit_breaker_threshold: 0.2  # More aggressive circuit breaking
+  circuit_breaker_recovery_timeout: 30.0
+  
+  # Connection pooling for reduced latency
+  connection_pool_size: 20
+  connection_pool_max_overflow: 30
+  connection_pool_timeout: 10.0
+  connection_pool_recycle: 3600  # 1 hour
+
+# AI Service Optimization
+ai_services:
+  # Deepgram STT optimization
+  deepgram:
+    model: "nova-2"  # Latest high-performance model
+    language: "en-US"
+    smart_format: true
+    punctuate: true
+    diarize: false  # Disabled for single speaker efficiency
+    multichannel: false
+    alternatives: 1  # Reduced for faster processing
+    profanity_filter: false  # Disabled for speed
+    redact: false  # Disabled for speed
+    search: false  # Disabled for speed
+    keywords: []  # Empty for speed
+    interim_results: true  # Enable for streaming
+    endpointing: 300  # 300ms silence detection
+    vad_turnoff: 1000  # 1s VAD turnoff
+    
+  # OpenAI LLM optimization
+  openai:
+    model: "gpt-4-turbo"  # Fast, high-quality model
+    temperature: 0.7
+    max_tokens: 150  # Reduced for faster responses
+    top_p: 0.9
+    frequency_penalty: 0.0
+    presence_penalty: 0.0
+    stream: true  # Enable streaming for perceived speed
+    timeout: 15.0  # Reduced timeout
+    
+  # Cartesia TTS optimization
+  cartesia:
+    voice_id: "default"
+    model_id: "sonic-english"  # Fast model
+    output_format: "pcm_16000"  # Optimized for telephony
+    speed: 1.0
+    emotion: "neutral"
+    language: "en"
+    stream: true  # Enable streaming
+
+# Database optimization
+database:
+  # Connection pool settings
+  pool_size: 20
+  max_overflow: 30
+  pool_timeout: 10
+  pool_recycle: 3600
+  pool_pre_ping: true
+  
+  # Query optimization
+  echo: false  # Disable SQL logging in production
+  query_timeout: 5.0
+  
+  # SQLite specific optimizations
+  sqlite_pragmas:
+    journal_mode: "WAL"  # Write-Ahead Logging for better concurrency
+    synchronous: "NORMAL"  # Balance between safety and speed
+    cache_size: -64000  # 64MB cache
+    temp_store: "MEMORY"  # Store temp tables in memory
+    mmap_size: 268435456  # 256MB memory-mapped I/O
+    optimize: true  # Enable query optimizer
+
+# Redis optimization (if used)
+redis:
+  # Connection settings
+  max_connections: 50
+  retry_on_timeout: true
+  socket_timeout: 5.0
+  socket_connect_timeout: 5.0
+  socket_keepalive: true
+  socket_keepalive_options: {}
+  
+  # Performance settings
+  decode_responses: true
+  encoding: "utf-8"
+  encoding_errors: "strict"
+
+# Network optimization
+network:
+  # HTTP client settings
+  http_timeout: 10.0
+  http_connect_timeout: 5.0
+  http_read_timeout: 10.0
+  http_pool_connections: 20
+  http_pool_maxsize: 50
+  http_max_retries: 2
+  
+  # WebSocket settings
+  websocket_timeout: 30.0
+  websocket_ping_interval: 20.0
+  websocket_ping_timeout: 10.0
+  websocket_close_timeout: 10.0
+  
+  # TCP settings
+  tcp_nodelay: true  # Disable Nagle's algorithm for lower latency
+  tcp_keepalive: true
+  tcp_keepalive_idle: 600  # 10 minutes
+  tcp_keepalive_interval: 60  # 1 minute
+  tcp_keepalive_count: 3
+
+# Caching optimization
+caching:
+  enabled: true
+  
+  # Response caching
+  response_cache_ttl: 300  # 5 minutes
+  response_cache_max_size: 1000
+  
+  # Context caching
+  context_cache_ttl: 1800  # 30 minutes
+  context_cache_max_size: 500
+  
+  # Audio caching
+  audio_cache_ttl: 600  # 10 minutes
+  audio_cache_max_size: 100
+
+# Compression settings
+compression:
+  enabled: true
+  level: 6  # Balance between compression ratio and speed
+  threshold: 1024  # Compress responses larger than 1KB
+
+# Monitoring optimization
+monitoring:
+  # Metrics collection
+  metrics_interval: 30.0  # 30 seconds
+  metrics_buffer_size: 1000
+  
+  # Health checks
+  health_check_interval: 30.0
+  health_check_timeout: 5.0
+  
+  # Logging optimization
+  log_level: "INFO"
+  structured_logging: true
+  log_format: "json"
+  log_buffer_size: 1000
+  log_flush_interval: 5.0
+
+# Security settings (optimized for performance)
+security:
+  # Rate limiting
+  rate_limit_per_minute: 120  # Increased for production
+  rate_limit_burst: 20
+  
+  # CORS optimization
+  cors_max_age: 86400  # 24 hours cache
+  
+  # Session optimization
+  session_timeout: 3600  # 1 hour
+  session_cleanup_interval: 300  # 5 minutes
+
+# Resource limits
+resources:
+  # Memory limits
+  max_memory_mb: 2048  # 2GB limit
+  memory_warning_threshold: 1536  # 1.5GB warning
+  
+  # CPU limits
+  max_cpu_percent: 80
+  cpu_warning_threshold: 60
+  
+  # Disk limits
+  max_disk_usage_percent: 85
+  disk_warning_threshold: 70
+  
+  # File limits
+  max_open_files: 4096
+  max_file_size_mb: 100
+
+# Garbage collection optimization
+gc:
+  # Python GC tuning
+  gc_threshold_0: 700
+  gc_threshold_1: 10
+  gc_threshold_2: 10
+  gc_collect_interval: 60.0  # Force GC every minute
+
+# Threading optimization
+threading:
+  # Thread pool settings
+  max_workers: 50
+  thread_name_prefix: "VoiceAI"
+  
+  # Async settings
+  event_loop_policy: "uvloop"  # Use uvloop for better performance
+  max_async_pool_size: 100
+
+# Development vs Production toggles
+development:
+  debug: false
+  reload: false
+  access_log: false  # Disable access logs for performance
+  
+# Feature flags for performance testing
+features:
+  enable_streaming: true
+  enable_prefetch: true
+  enable_compression: true
+  enable_caching: true
+  enable_connection_pooling: true
+  enable_circuit_breaker: true
+  enable_metrics_collection: true
+  enable_health_checks: true
+  enable_auto_optimization: true

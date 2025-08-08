@@ -1,0 +1,134 @@
+{
+  "total_tests": 7,
+  "passed_tests": 7,
+  "failed_tests": 0,
+  "warning_tests": 0,
+  "success_rate": 1.0,
+  "overall_status": "PASSED",
+  "total_duration": 11.9521484375,
+  "results": [
+    {
+      "test_name": "Environment Setup",
+      "status": "PASS",
+      "duration": 0.025114774703979492,
+      "details": {
+        "components_initialized": 4,
+        "environment": "testing",
+        "orchestrator_ready": true
+      },
+      "error_message": null,
+      "timestamp": "2025-07-31T13:07:02.146558+00:00"
+    },
+    {
+      "test_name": "System Health",
+      "status": "PASS",
+      "duration": 0.0018470287322998047,
+      "details": {
+        "health_checks": {
+          "orchestrator_healthy": true,
+          "system_healthy": true,
+          "all_components_healthy": true
+        },
+        "orchestrator_status": "healthy",
+        "system_status": "healthy",
+        "healthy_components": 4,
+        "total_components": 4
+      },
+      "error_message": null,
+      "timestamp": "2025-07-31T13:07:02.146591+00:00"
+    },
+    {
+      "test_name": "Call Simulation",
+      "status": "PASS",
+      "duration": 1.6627333164215088,
+      "details": {
+        "total_calls": 3,
+        "successful_calls": 3,
+        "failed_calls": 0,
+        "success_rate": 1.0,
+        "avg_latency": 0.3533480167388916,
+        "max_latency": 0.3659839630126953,
+        "latency_target": 2.0
+      },
+      "error_message": null,
+      "timestamp": "2025-07-31T13:07:02.146605+00:00"
+    },
+    {
+      "test_name": "Performance Optimization",
+      "status": "PASS",
+      "duration": 0.0017552375793457031,
+      "details": {
+        "total_latency": 0.8,
+        "target_latency": 1.5,
+        "bottlenecks_found": 0,
+        "recommendations_generated": 0,
+        "optimization_applied": true,
+        "latency_breakdown": {
+          "total_latency": 0.8,
+          "stt_latency": 0.2,
+          "llm_latency": 0.3,
+          "tts_latency": 0.2,
+          "network_latency": 0.05,
+          "processing_overhead": 0.03,
+          "queue_wait_time": 0.02
+        }
+      },
+      "error_message": null,
+      "timestamp": "2025-07-31T13:07:02.146616+00:00"
+    },
+    {
+      "test_name": "Load Handling",
+      "status": "PASS",
+      "duration": 0.06793522834777832,
+      "details": {
+        "concurrent_calls": 5,
+        "successful_calls": 5,
+        "failed_calls": 0,
+        "success_rate": 1.0,
+        "avg_duration": 0.013319587707519532,
+        "max_duration": 0.013847589492797852
+      },
+      "error_message": null,
+      "timestamp": "2025-07-31T13:07:02.146628+00:00"
+    },
+    {
+      "test_name": "Stability Test",
+      "status": "PASS",
+      "duration": 10.188620567321777,
+      "details": {
+        "test_duration": 10,
+        "actual_duration": 10.188620567321777,
+        "total_calls": 20,
+        "successful_calls": 20,
+        "failed_calls": 0,
+        "success_rate": 1.0,
+        "final_health_status": "healthy",
+        "calls_per_second": 1.9629742679933053
+      },
+      "error_message": null,
+      "timestamp": "2025-07-31T13:07:02.146641+00:00"
+    },
+    {
+      "test_name": "Production Readiness",
+      "status": "PASS",
+      "duration": 0.00028586387634277344,
+      "details": {
+        "readiness_checks": {
+          "configuration_valid": true,
+          "secret_key_secure": true,
+          "api_keys_configured": true,
+          "performance_targets": true,
+          "monitoring_enabled": true,
+          "logging_configured": true
+        },
+        "passed_checks": 6,
+        "total_checks": 6,
+        "readiness_score": 1.0,
+        "environment": "development"
+      },
+      "error_message": null,
+      "timestamp": "2025-07-31T13:07:02.146652+00:00"
+    }
+  ],
+  "timestamp": "2025-07-31T13:07:02.146665+00:00"
+}

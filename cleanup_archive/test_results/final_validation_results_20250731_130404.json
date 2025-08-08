@@ -1,0 +1,96 @@
+{
+  "total_tests": 7,
+  "passed_tests": 0,
+  "failed_tests": 6,
+  "warning_tests": 1,
+  "success_rate": 0.0,
+  "overall_status": "FAILED",
+  "total_duration": 10.662001132965088,
+  "results": [
+    {
+      "test_name": "Environment Setup",
+      "status": "FAIL",
+      "duration": 0.0221250057220459,
+      "details": {},
+      "error_message": "TTSResponse.__init__() missing 1 required positional argument: 'synthesis_time'",
+      "timestamp": "2025-07-31T13:04:04.126168+00:00"
+    },
+    {
+      "test_name": "System Health",
+      "status": "FAIL",
+      "duration": 5.1021575927734375e-05,
+      "details": {},
+      "error_message": "'NoneType' object has no attribute 'get_health_status'",
+      "timestamp": "2025-07-31T13:04:04.126211+00:00"
+    },
+    {
+      "test_name": "Call Simulation",
+      "status": "FAIL",
+      "duration": 0.6031084060668945,
+      "details": {
+        "total_calls": 3,
+        "successful_calls": 0,
+        "failed_calls": 3,
+        "success_rate": 0.0,
+        "avg_latency": 0,
+        "max_latency": 0,
+        "latency_target": 2.0
+      },
+      "error_message": null,
+      "timestamp": "2025-07-31T13:04:04.126237+00:00"
+    },
+    {
+      "test_name": "Performance Optimization",
+      "status": "FAIL",
+      "duration": 0.00026869773864746094,
+      "details": {},
+      "error_message": "'NoneType' object has no attribute 'measure_end_to_end_latency'",
+      "timestamp": "2025-07-31T13:04:04.126252+00:00"
+    },
+    {
+      "test_name": "Load Handling",
+      "status": "FAIL",
+      "duration": 0.0007777214050292969,
+      "details": {
+        "concurrent_calls": 5,
+        "successful_calls": 0,
+        "failed_calls": 5,
+        "success_rate": 0.0,
+        "avg_duration": 0,
+        "max_duration": 0
+      },
+      "error_message": null,
+      "timestamp": "2025-07-31T13:04:04.126264+00:00"
+    },
+    {
+      "test_name": "Stability Test",
+      "status": "FAIL",
+      "duration": 10.031718969345093,
+      "details": {},
+      "error_message": "'NoneType' object has no attribute 'get_health_status'",
+      "timestamp": "2025-07-31T13:04:04.126276+00:00"
+    },
+    {
+      "test_name": "Production Readiness",
+      "status": "WARNING",
+      "duration": 0.0003256797790527344,
+      "details": {
+        "readiness_checks": {
+          "configuration_valid": false,
+          "secret_key_secure": true,
+          "api_keys_configured": true,
+          "performance_targets": true,
+          "monitoring_enabled": true,
+          "logging_configured": true
+        },
+        "passed_checks": 5,
+        "total_checks": 6,
+        "readiness_score": 0.8333333333333334,
+        "environment": "development"
+      },
+      "error_message": null,
+      "timestamp": "2025-07-31T13:04:04.126300+00:00"
+    }
+  ],
+  "timestamp": "2025-07-31T13:04:04.126308+00:00"
+}
